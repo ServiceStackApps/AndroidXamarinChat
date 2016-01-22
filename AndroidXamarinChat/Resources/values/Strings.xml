@@ -3,6 +3,6 @@
 	<string name="hello">Hello World, Click Me!</string>
 	<string name="app_name">AndroidXamarinChat</string>
 
-	<string name="openDrawer">Drawer Open</string>
-	<string name="closeDrawer">Drawer Closed</string>
+	<string name="openDrawer">Switch channels</string>
+	<string name="closeDrawer">Xamarin Chat</string>
 </resources>

@@ -11,6 +11,7 @@ using Android.Support.V7.App;
 using Android.Support.V4.Widget;
 using Android.Views;
 using System.Threading.Tasks;
+using ServiceStack.Configuration;
 
 namespace AndroidXamarinChat
 {
@@ -86,24 +87,7 @@ namespace AndroidXamarinChat
 			mDrawerLayout.SetDrawerListener(mDrawerToggle);
 			mDrawerToggle.SyncState();
 
-			if (bundle != null)
-			{
-				if (bundle.GetString("DrawerState") == "Opened")
-				{
-					SupportActionBar.SetTitle(Resource.String.openDrawer);
-				}
-
-				else
-				{
-					SupportActionBar.SetTitle(Resource.String.closeDrawer);
-				}
-			}
-
-			else
-			{
-				//This is the first the time the activity is ran
-				SupportActionBar.SetTitle(Resource.String.closeDrawer);
-			}
+			SupportActionBar.Title = currentChannel;
 
 			ServerEventConnect connectMsg = null;
 			var errors = new List<Exception>();
@@ -118,20 +102,23 @@ namespace AndroidXamarinChat
 				{
 
 				},
-				OnMessage = message =>
+				OnMessage = message => 
 				{
 
 				},
 				OnException = errors.Add,
 			}.Start();
 
-			client.RegisterReceiver<ChatReceiver>();
-			MessageView messageView = new MessageView (this, this.messageHistoryAdapter);
+
+
+			ChatMessageHandler messageHandler = new ChatMessageHandler (this, this.messageHistoryAdapter);
+			client.Resolver = new MessageResolver (messageHandler);
+			client.RegisterNamedReceiver<ChatReceiver> ("cmd");
 
 			var chatHistory = client.ServiceClient.Get(new GetChatHistory { Channels = channels});
 			chatHistory.Results.ForEach ((cm) => {
 				if(cm.Channel == currentChannel)
-					messageView.AppendMessage(cm);
+					messageHandler.AppendMessage(cm);
 			});
 			sendButton.Click += delegate
 			{
@@ -146,7 +133,7 @@ namespace AndroidXamarinChat
 								Selector = "cmd.chat"
 							});
 
-						messageView.AppendMessage(response);
+						messageHandler.AppendMessage(response);
 						this.RunOnUiThread(() => {
 							messageBox.Text = "";
 						});
@@ -230,42 +217,36 @@ namespace AndroidXamarinChat
 
 	public class ChatReceiver : ServerEventReceiver
 	{
-		private readonly Activity activity;
-		private readonly EditText clientMessageBox;
-		private readonly EditText messageView;
+		private readonly ChatMessageHandler chatMessageHandler;
 
-		public ChatReceiver(Activity activity)
+		public ChatReceiver(ChatMessageHandler chatMessageHandler)
 		{
-			this.activity = activity;
-			clientMessageBox = activity.FindViewById<EditText>(Resource.Id.sendMessageButton);
-			messageView = activity.FindViewById<EditText>(Resource.Id.messageHistory);
+			this.chatMessageHandler = chatMessageHandler;
 		}
 
 		public void Chat(ChatMessage chatMessage)
 		{
-			activity.RunOnUiThread(() =>
-				{
-					messageView.Text += chatMessage.DisplayMessage();
-				});
+			chatMessageHandler.AppendMessage (chatMessage);
+		}
+
+		public void Announce(string message)
+		{
+
+		}
+			
+		public void Toggle(string message) 
+		{ 
+			
+		}
+
+		public void BackgroundImage(string cssRule) 
+		{
+			
 		}
 	}
 
-	public class MessageView
+	public class TvReciever : ServerEventReceiver
 	{
-		private Activity parentActivity;
-		private ArrayAdapter messageAdapter;
-		public MessageView(Activity parentActivity, ArrayAdapter messageAdapter)
-		{
-			this.parentActivity = parentActivity;
-			this.messageAdapter = messageAdapter;
-		}
 
-		public void AppendMessage(ChatMessage chatMessage)
-		{
-			parentActivity.RunOnUiThread (() => {
-				messageAdapter.Add (chatMessage.DisplayMessage ());
-				messageAdapter.NotifyDataSetChanged ();
-			});
-		}
 	}
 }

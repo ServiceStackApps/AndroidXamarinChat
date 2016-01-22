@@ -75,6 +75,7 @@
     <Compile Include="ChatDtos.dtos.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="ChatActionBarDrawerToggle.cs" />
+    <Compile Include="ChatMessageHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />
