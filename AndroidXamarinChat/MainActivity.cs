@@ -19,9 +19,6 @@ namespace AndroidXamarinChat
 		Theme="@style/ChatApp")]
 	public class MainActivity : AppCompatActivity
 	{
-		string[] channels = { "home" };
-		string currentChannel = "home";
-
 		private ChatActionBarDrawerToggle mDrawerToggle;
 		private DrawerLayout mDrawerLayout;
 		private ListView mLeftDrawer;
@@ -36,6 +33,9 @@ namespace AndroidXamarinChat
 		private List<string> mRightDataSet;
 
 		private List<string> messageHistoryDataSet;
+		List<Exception> errors = new List<Exception> ();
+
+		ServerEventConnect lastConnectMessage;
 
 		protected override void OnCreate(Bundle bundle)
 		{
@@ -57,16 +57,27 @@ namespace AndroidXamarinChat
 			mLeftDrawer.Tag = 0;
 			mRightDrawer.Tag = 1;
 
-			SetSupportActionBar(mToolbar);
-			var leftMenuData = new List<string> (channels);
-			leftMenuData.Add ("Create Channel+");
-			mLeftAdapter = new ArrayAdapter<string>(this, Android.Resource.Layout.SimpleListItem1, leftMenuData);
-			mLeftDrawer.Adapter = mLeftAdapter;
-
 			messageHistoryDataSet = new List<string> ();
 			messageHistoryAdapter = new ArrayAdapter (this, Android.Resource.Layout.SimpleListItem1, messageHistoryDataSet);
 			messageHistoryList.Adapter = messageHistoryAdapter;
 
+			ChatCmdReciever cmdReceiver = new ChatCmdReciever (this, this.messageHistoryAdapter);
+			ChatClient client = new ChatClient(new string[] { "home" });
+			client.OnConnect = connectMsg => {
+				lastConnectMessage = connectMsg;
+			};
+			client.OnException = error => {
+				errors.Add(error);
+			};
+			client.RegisterNamedReceiver<ChatReceiver> ("cmd");
+			client.RegisterNamedReceiver<TvReciever> ("tv");
+			client.Resolver = new MessageResolver (cmdReceiver);
+
+			SetSupportActionBar(mToolbar);
+			var leftMenuData = new List<string> (client.Channels);
+			leftMenuData.Add ("Create Channel+");
+			mLeftAdapter = new ArrayAdapter<string>(this, Android.Resource.Layout.SimpleListItem1, leftMenuData);
+			mLeftDrawer.Adapter = mLeftAdapter;
 
 			mRightDataSet = new List<string>();
 			mRightDataSet.Add ("Right Item 1");
@@ -87,57 +98,51 @@ namespace AndroidXamarinChat
 			mDrawerLayout.SetDrawerListener(mDrawerToggle);
 			mDrawerToggle.SyncState();
 
-			SupportActionBar.Title = currentChannel;
+			mLeftDrawer.ItemClick += (object sender, AdapterView.ItemClickEventArgs e) => {
+				string itemText = mLeftDrawer.Adapter.GetItem(e.Position).ToString();
+				if(itemText == "Create Channel+") {
+					var result = UIHelpers.ShowChannelDialog(this);
+					messageHistoryAdapter.Clear();
+					messageHistoryAdapter.NotifyDataSetChanged();
+					result.ContinueWith(ta => {
+						try{
+							string nChannel = ta.Result;
+							this.RunOnUiThread(() => {
+								UIHelpers.AddChannelToDrawer(mLeftAdapter,nChannel);
+							});
+							client.ChangeChannel(ta.Result,cmdReceiver);
+						} catch (Exception ex) 
+						{
+							errors.Add(ex);
+						}					
+					});
+				} else {
 
-			ServerEventConnect connectMsg = null;
-			var errors = new List<Exception>();
+					//Change channel
+					client.ChangeChannel(itemText, cmdReceiver);
 
-			var client = new ServerEventsClient("http://chat.servicestack.net",channels:channels.Join())
-			{
-				OnConnect = e =>
-				{
-					connectMsg = e;
-				},
-				OnCommand = message =>
-				{
+				}
+				mDrawerLayout.CloseDrawer(mLeftDrawer);
+			};
+				
+			client.Start ();
+			client.UpdateChatHistory (client.Channels, client.CurrentChannel, cmdReceiver);
 
-				},
-				OnMessage = message => 
-				{
-
-				},
-				OnException = errors.Add,
-			}.Start();
-
-
-
-			ChatCmdReciever messageHandler = new ChatCmdReciever (this, this.messageHistoryAdapter);
-			client.Resolver = new MessageResolver (messageHandler);
-			client.RegisterNamedReceiver<ChatReceiver> ("cmd");
-			client.RegisterNamedReceiver<TvReciever> ("tv");
-
-			var chatHistory = client.ServiceClient.Get(new GetChatHistory { Channels = channels});
-			chatHistory.Results.ForEach ((cm) => {
-				if(cm.Channel == currentChannel)
-					messageHandler.AppendMessage(cm);
-			});
 			sendButton.Click += delegate
 			{
 				try
 				{
 					Task.Run(() => {
-						var response = client.ServiceClient.Post<ChatMessage>(new PostChatToChannel
+						client.SendMessage(new PostChatToChannel
 							{
-								Channel = currentChannel,
-								From = connectMsg.Id,
+								Channel = client.CurrentChannel,
+								From = lastConnectMessage.Id,
 								Message = messageBox.Text,
 								Selector = "cmd.chat"
 							});
-
-						messageHandler.AppendMessage(response);
-						this.RunOnUiThread(() => {
-							messageBox.Text = "";
-						});
+					});
+					this.RunOnUiThread(() => {
+						messageBox.Text = "";
 					});
 				}
 				catch (Exception exception)
@@ -213,51 +218,6 @@ namespace AndroidXamarinChat
 		{
 			base.OnConfigurationChanged (newConfig);
 			mDrawerToggle.OnConfigurationChanged(newConfig);
-		}
-	}
-
-	public class ChatReceiver : ServerEventReceiver
-	{
-		private readonly ChatCmdReciever chatMessageHandler;
-
-		public ChatReceiver(ChatCmdReciever chatMessageHandler)
-		{
-			this.chatMessageHandler = chatMessageHandler;
-		}
-
-		public void Chat(ChatMessage chatMessage)
-		{
-			chatMessageHandler.AppendMessage (chatMessage);
-		}
-
-		public void Announce(string message)
-		{
-
-		}
-			
-		public void Toggle(string message) 
-		{ 
-			
-		}
-
-		public void BackgroundImage(string cssRule) 
-		{
-			
-		}
-	}
-
-	public class TvReciever : ServerEventReceiver
-	{
-		private readonly ChatCmdReciever chatMessageHandler;
-
-		public TvReciever(ChatCmdReciever chatMessageHandler)
-		{
-			this.chatMessageHandler = chatMessageHandler;
-		}
-
-		public void Watch(string videoUrl)
-		{
-			chatMessageHandler.ShowVideo (videoUrl);
 		}
 	}
 }

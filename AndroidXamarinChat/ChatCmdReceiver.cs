@@ -5,6 +5,7 @@ using Chat;
 using ServiceStack;
 using ServiceStack.Configuration;
 using Android.Content;
+using System.Collections.Generic;
 
 namespace AndroidXamarinChat
 {
@@ -23,6 +24,16 @@ namespace AndroidXamarinChat
 			parentActivity.RunOnUiThread (() => {
 				messageAdapter.Add (chatMessage.DisplayMessage ());
 				messageAdapter.NotifyDataSetChanged ();
+			});
+		}
+
+		public void ChangeChannel(string channel, List<ChatMessage> fullHistory)
+		{
+			messageAdapter.Clear ();
+			fullHistory.ForEach (msg => {
+				if(msg.Channel == channel) {
+					messageAdapter.Add(msg.DisplayMessage());
+				}
 			});
 		}
 
