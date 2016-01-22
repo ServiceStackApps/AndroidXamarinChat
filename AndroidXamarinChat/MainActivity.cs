@@ -10,6 +10,7 @@ using SupportToolbar = Android.Support.V7.Widget.Toolbar;
 using Android.Support.V7.App;
 using Android.Support.V4.Widget;
 using Android.Views;
+using System.Threading.Tasks;
 
 namespace AndroidXamarinChat
 {
@@ -25,10 +26,15 @@ namespace AndroidXamarinChat
 		private ListView mLeftDrawer;
 		private ListView mRightDrawer;
 
+		private ListView messageHistoryList;
+
 		private ArrayAdapter mLeftAdapter;
 		private ArrayAdapter mRightAdapter;
+		private ArrayAdapter messageHistoryAdapter;
 
 		private List<string> mRightDataSet;
+
+		private List<string> messageHistoryDataSet;
 
 		protected override void OnCreate(Bundle bundle)
 		{
@@ -39,13 +45,13 @@ namespace AndroidXamarinChat
 
 			// Get our button from the layout resource,
 			// and attach an event to it
-			Button button = FindViewById<Button>(Resource.Id.sendMessageButton);
-			EditText editText = FindViewById<EditText>(Resource.Id.message);
-			EditText textView = FindViewById<EditText>(Resource.Id.messageHistory);
+			Button sendButton = FindViewById<Button>(Resource.Id.sendMessageButton);
+			EditText messageBox = FindViewById<EditText>(Resource.Id.message);
 			SupportToolbar mToolbar = FindViewById<SupportToolbar>(Resource.Id.toolbar);
 			mDrawerLayout = FindViewById<DrawerLayout>(Resource.Id.drawer_layout);
 			mLeftDrawer = FindViewById<ListView>(Resource.Id.left_drawer);
 			mRightDrawer = FindViewById<ListView>(Resource.Id.right_drawer);
+			messageHistoryList = FindViewById<ListView>(Resource.Id.messageHistory);
 
 			mLeftDrawer.Tag = 0;
 			mRightDrawer.Tag = 1;
@@ -55,6 +61,11 @@ namespace AndroidXamarinChat
 			leftMenuData.Add ("Create Channel+");
 			mLeftAdapter = new ArrayAdapter<string>(this, Android.Resource.Layout.SimpleListItem1, leftMenuData);
 			mLeftDrawer.Adapter = mLeftAdapter;
+
+			messageHistoryDataSet = new List<string> ();
+			messageHistoryAdapter = new ArrayAdapter (this, Android.Resource.Layout.SimpleListItem1, messageHistoryDataSet);
+			messageHistoryList.Adapter = messageHistoryAdapter;
+
 
 			mRightDataSet = new List<string>();
 			mRightDataSet.Add ("Right Item 1");
@@ -115,26 +126,31 @@ namespace AndroidXamarinChat
 			}.Start();
 
 			client.RegisterReceiver<ChatReceiver>();
-			MessageView messageView = new MessageView (this, textView);
+			MessageView messageView = new MessageView (this, this.messageHistoryAdapter);
 
 			var chatHistory = client.ServiceClient.Get(new GetChatHistory { Channels = channels});
 			chatHistory.Results.ForEach ((cm) => {
 				if(cm.Channel == currentChannel)
 					messageView.AppendMessage(cm);
 			});
-			button.Click += delegate
+			sendButton.Click += delegate
 			{
 				try
 				{
-					var response = client.ServiceClient.Post<ChatMessage>(new PostChatToChannel
-						{
-							Channel = currentChannel,
-							From = connectMsg.Id,
-							Message = editText.Text,
-							Selector = "cmd.chat"
-						});
+					Task.Run(() => {
+						var response = client.ServiceClient.Post<ChatMessage>(new PostChatToChannel
+							{
+								Channel = currentChannel,
+								From = connectMsg.Id,
+								Message = messageBox.Text,
+								Selector = "cmd.chat"
+							});
 
-					messageView.AppendMessage(response);
+						messageView.AppendMessage(response);
+						this.RunOnUiThread(() => {
+							messageBox.Text = "";
+						});
+					});
 				}
 				catch (Exception exception)
 				{
@@ -236,18 +252,19 @@ namespace AndroidXamarinChat
 
 	public class MessageView
 	{
-		private TextView textView;
 		private Activity parentActivity;
-		public MessageView(Activity parentActivity, TextView textView)
+		private ArrayAdapter messageAdapter;
+		public MessageView(Activity parentActivity, ArrayAdapter messageAdapter)
 		{
 			this.parentActivity = parentActivity;
-			this.textView = textView;
+			this.messageAdapter = messageAdapter;
 		}
 
 		public void AppendMessage(ChatMessage chatMessage)
 		{
 			parentActivity.RunOnUiThread (() => {
-				textView.Text += chatMessage.DisplayMessage();
+				messageAdapter.Add (chatMessage.DisplayMessage ());
+				messageAdapter.NotifyDataSetChanged ();
 			});
 		}
 	}

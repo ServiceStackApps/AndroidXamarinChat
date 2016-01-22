@@ -1860,8 +1860,8 @@ namespace AndroidXamarinChat
 			// aapt resource value: 0x7f0c0078
 			public const int line3 = 2131492984;
 			
-			// aapt resource value: 0x7f0c006a
-			public const int linearLayout2 = 2131492970;
+			// aapt resource value: 0x7f0c0068
+			public const int linearLayout2 = 2131492968;
 			
 			// aapt resource value: 0x7f0c000a
 			public const int listMode = 2131492874;
@@ -1872,11 +1872,11 @@ namespace AndroidXamarinChat
 			// aapt resource value: 0x7f0c0072
 			public const int media_actions = 2131492978;
 			
-			// aapt resource value: 0x7f0c006b
-			public const int message = 2131492971;
-			
 			// aapt resource value: 0x7f0c0069
-			public const int messageHistory = 2131492969;
+			public const int message = 2131492969;
+			
+			// aapt resource value: 0x7f0c006c
+			public const int messageHistory = 2131492972;
 			
 			// aapt resource value: 0x7f0c001b
 			public const int middle = 2131492891;
@@ -1965,8 +1965,8 @@ namespace AndroidXamarinChat
 			// aapt resource value: 0x7f0c0063
 			public const int select_dialog_listview = 2131492963;
 			
-			// aapt resource value: 0x7f0c006c
-			public const int sendMessageButton = 2131492972;
+			// aapt resource value: 0x7f0c006a
+			public const int sendMessageButton = 2131492970;
 			
 			// aapt resource value: 0x7f0c004e
 			public const int shortcut = 2131492942;
@@ -2019,8 +2019,8 @@ namespace AndroidXamarinChat
 			// aapt resource value: 0x7f0c0048
 			public const int textSpacerNoButtons = 2131492936;
 			
-			// aapt resource value: 0x7f0c0068
-			public const int textView1 = 2131492968;
+			// aapt resource value: 0x7f0c006b
+			public const int textView1 = 2131492971;
 			
 			// aapt resource value: 0x7f0c0075
 			public const int time = 2131492981;
