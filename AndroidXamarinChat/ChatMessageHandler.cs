@@ -4,14 +4,15 @@ using Android.Widget;
 using Chat;
 using ServiceStack;
 using ServiceStack.Configuration;
+using Android.Content;
 
 namespace AndroidXamarinChat
 {
-	public class ChatMessageHandler
+	public class ChatCmdReciever
 	{
 		private Activity parentActivity;
 		private ArrayAdapter messageAdapter;
-		public ChatMessageHandler(Activity parentActivity, ArrayAdapter messageAdapter)
+		public ChatCmdReciever(Activity parentActivity, ArrayAdapter messageAdapter)
 		{
 			this.parentActivity = parentActivity;
 			this.messageAdapter = messageAdapter;
@@ -27,15 +28,14 @@ namespace AndroidXamarinChat
 
 		public void ShowVideo(string videoUrl)
 		{
-			
+			parentActivity.StartActivity(new Intent(Intent.ActionView, Android.Net.Uri.Parse(videoUrl)));
 		}
-
 	}
 
 	public class MessageResolver : IResolver
 	{
-		ChatMessageHandler messageHandler;
-		public MessageResolver(ChatMessageHandler messageHandler)
+		ChatCmdReciever messageHandler;
+		public MessageResolver(ChatCmdReciever messageHandler)
 		{
 			this.messageHandler = messageHandler;
 		}
@@ -44,6 +44,8 @@ namespace AndroidXamarinChat
 		{
 			if (typeof(T) == typeof(ChatReceiver)) {
 				return (T)(new ChatReceiver (this.messageHandler) as object);
+			} else if (typeof(T) == typeof(TvReciever)) {
+				return (T)(new TvReciever (this.messageHandler) as object);
 			}
 			else
 				return typeof(T).CreateInstance<T> ();

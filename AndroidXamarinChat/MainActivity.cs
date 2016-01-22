@@ -111,9 +111,10 @@ namespace AndroidXamarinChat
 
 
 
-			ChatMessageHandler messageHandler = new ChatMessageHandler (this, this.messageHistoryAdapter);
+			ChatCmdReciever messageHandler = new ChatCmdReciever (this, this.messageHistoryAdapter);
 			client.Resolver = new MessageResolver (messageHandler);
 			client.RegisterNamedReceiver<ChatReceiver> ("cmd");
+			client.RegisterNamedReceiver<TvReciever> ("tv");
 
 			var chatHistory = client.ServiceClient.Get(new GetChatHistory { Channels = channels});
 			chatHistory.Results.ForEach ((cm) => {
@@ -217,9 +218,9 @@ namespace AndroidXamarinChat
 
 	public class ChatReceiver : ServerEventReceiver
 	{
-		private readonly ChatMessageHandler chatMessageHandler;
+		private readonly ChatCmdReciever chatMessageHandler;
 
-		public ChatReceiver(ChatMessageHandler chatMessageHandler)
+		public ChatReceiver(ChatCmdReciever chatMessageHandler)
 		{
 			this.chatMessageHandler = chatMessageHandler;
 		}
@@ -247,6 +248,16 @@ namespace AndroidXamarinChat
 
 	public class TvReciever : ServerEventReceiver
 	{
+		private readonly ChatCmdReciever chatMessageHandler;
 
+		public TvReciever(ChatCmdReciever chatMessageHandler)
+		{
+			this.chatMessageHandler = chatMessageHandler;
+		}
+
+		public void Watch(string videoUrl)
+		{
+			chatMessageHandler.ShowVideo (videoUrl);
+		}
 	}
 }
