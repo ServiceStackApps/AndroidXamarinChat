@@ -55,12 +55,15 @@ namespace AndroidXamarinChat
 		{
 			this.CurrentChannel = channel;
 			var currentChannels = new List<string> (this.Channels);
+
 			if (currentChannels.Contains (channel)) {
 				cmdReceiver.ChangeChannel (channel, this.HistoryCache);
 			} else {
-				var updatedChannels = new List<string> (this.Channels);
-				updatedChannels.Add (channel);
-				this.Channels = updatedChannels.ToArray ();
+				currentChannels.Add (channel);
+				this.Channels = currentChannels.ToArray ();
+				if (Channels != null && Channels.Length > 0)
+					this.EventStreamUri = this.EventStreamUri
+						.AddQueryParam("channel", string.Join(",", Channels));
 				this.Restart ();
 				this.UpdateChatHistory (this.Channels, channel, cmdReceiver);
 			}
