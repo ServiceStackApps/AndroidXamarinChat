@@ -12,11 +12,12 @@ using Android.Support.V4.Widget;
 using Android.Views;
 using System.Threading.Tasks;
 using ServiceStack.Configuration;
+using Android.Content.PM;
 
 namespace AndroidXamarinChat
 {
 	[Activity (Label = "AndroidXamarinChat", MainLauncher = true, Icon = "@mipmap/icon",
-		Theme="@style/ChatApp")]
+		Theme="@style/ChatApp", ScreenOrientation = ScreenOrientation.Portrait)]
 	public class MainActivity : AppCompatActivity
 	{
 		private ChatActionBarDrawerToggle mDrawerToggle;
