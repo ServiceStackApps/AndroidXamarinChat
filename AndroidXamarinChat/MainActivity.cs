@@ -77,7 +77,18 @@ namespace AndroidXamarinChat
 			messageHistoryAdapter = new ArrayAdapter (this, Android.Resource.Layout.SimpleListItem1, messageHistoryDataSet);
 			messageHistoryList.Adapter = messageHistoryAdapter;
 
-		    client = new ChatClient(new[] {"home"})
+			ISharedPreferences prefs = PreferenceManager.GetDefaultSharedPreferences(this); 
+			var channels = prefs.GetString ("Channels", null);
+			var lastChannel = prefs.GetString ("LastChannel", null);
+			cmdReceiver = new ChatCmdReciever (this, messageHistoryAdapter, lastChannel ?? "home");
+			string[] chanArray;
+			if (channels != null) {
+				chanArray = channels.Split (',');
+			} else {
+				chanArray = new[] {"home"};
+			}
+
+			client = new ChatClient(chanArray)
 		    {
 		        OnConnect = connectMsg => { 
 					client.UpdateChatHistory(cmdReceiver).ConfigureAwait(false);
@@ -214,15 +225,7 @@ namespace AndroidXamarinChat
 		{
 			base.OnPostCreate (savedInstanceState);
 			mDrawerToggle.SyncState();
-			ISharedPreferences prefs = PreferenceManager.GetDefaultSharedPreferences(this); 
-			var channels = prefs.GetString ("Channels", null);
-			var lastChannel = prefs.GetString ("LastChannel", null);
-			cmdReceiver = new ChatCmdReciever (this, messageHistoryAdapter, lastChannel ?? "home");
-			if (channels != null) {
-				var chanArray = channels.Split (',');
-				client.Channels = chanArray;
-				UIHelpers.ResetChannelDrawer (this, mLeftAdapter, chanArray);
-			}
+			UIHelpers.ResetChannelDrawer (this, mLeftAdapter, client.Channels);
 			client.Resolver = new MessageResolver (cmdReceiver);
 			client.Connect ().ConfigureAwait (false);
 		}
