@@ -6,6 +6,7 @@ using ServiceStack;
 using ServiceStack.Configuration;
 using Android.Content;
 using System.Collections.Generic;
+using Android.OS;
 
 namespace AndroidXamarinChat
 {
@@ -15,7 +16,7 @@ namespace AndroidXamarinChat
 		private ArrayAdapter messageAdapter;
 		public Dictionary<string,List<string>> FullHistory { get; set; }
 
-		public string CurrentChannel  { get; private set; }
+		public string CurrentChannel  { get; set; }
 
 		public ChatCmdReciever(Activity parentActivity, ArrayAdapter messageAdapter, string initialChannel)
 		{
@@ -52,9 +53,50 @@ namespace AndroidXamarinChat
 			});
 		}
 
+		public void SyncAdapter()
+		{
+			ChangeChannel (this.CurrentChannel);
+		}
+
 		public void ShowVideo(string videoUrl)
 		{
 			parentActivity.StartActivity(new Intent(Intent.ActionView, Android.Net.Uri.Parse(videoUrl)));
+		}
+
+		public void Announce(string message)
+		{
+			Intent intent = new Intent (parentActivity, typeof(MainActivity));
+			const int pendingIntentId = 0;
+			PendingIntent pendingIntent = 
+				PendingIntent.GetActivity (parentActivity, pendingIntentId, intent, PendingIntentFlags.OneShot);
+			// Instantiate the builder and set notification elements:
+			Notification.Builder builder = new Notification.Builder (parentActivity)
+				.SetContentIntent(pendingIntent)
+				.SetLocalOnly(true)
+				.SetAutoCancel(true)
+				.SetContentTitle ("Chat (Xamarin)")
+				.SetContentText (message)
+				.SetSmallIcon (Resource.Drawable.ic_stat_icon);
+
+			// Build the notification:
+			Notification notification = builder.Build();
+
+			// Get the notification manager:
+			NotificationManager notificationManager =
+				parentActivity.GetSystemService (Context.NotificationService) as NotificationManager;
+
+			// Publish the notification:
+			const int notificationId = 0;
+			notificationManager.Notify (notificationId, notification);
+
+			Vibrator vibrator = (Vibrator)parentActivity.GetSystemService(Context.VibratorService);
+			vibrator.Vibrate(1000);
+
+			this.AppendMessage (new ChatMessage { 
+				Channel = this.CurrentChannel,
+				FromName = "~Announcement~",
+				Message = message
+			});
 		}
 	}
 

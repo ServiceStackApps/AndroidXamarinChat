@@ -7,8 +7,9 @@ namespace AndroidXamarinChat
 {
 	public class ChatClient : ServerEventsClient
 	{
+		private const string baseUrl = "http://chat.servicestack.net/";
 		public ChatClient (string[] channels)
-			: base ("http://chat.servicestack.net/", channels)
+			: base (baseUrl, channels)
 		{
 			this.RegisterNamedReceiver<ChatReceiver> ("cmd");
 			this.RegisterNamedReceiver<TvReciever> ("tv");
@@ -30,19 +31,9 @@ namespace AndroidXamarinChat
 				if (Channels != null && Channels.Length > 0)
 					this.EventStreamUri = this.EventStreamUri
 						.AddQueryParam("channel", string.Join(",", Channels));
+				cmdReceiver.CurrentChannel = channel;
 				this.Restart ();
-				this.UpdateChatHistory (this.Channels, cmdReceiver).ContinueWith (t => {
-					cmdReceiver.ChangeChannel (channel);
-				});
 			}
-		}
-
-		public void StartChat(ChatCmdReciever cmdReceiver)
-		{
-			this.Start ();
-			this.UpdateChatHistory (this.Channels, cmdReceiver).ContinueWith (t => {
-				cmdReceiver.ChangeChannel (cmdReceiver.CurrentChannel);
-			});
 		}
 	}
 }

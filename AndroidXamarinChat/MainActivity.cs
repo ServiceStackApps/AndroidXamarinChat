@@ -11,10 +11,12 @@ using Android.Support.V4.Widget;
 using Android.Views;
 using System.Threading.Tasks;
 using Android.Content.PM;
+using Android.Preferences;
+using Android.Content;
 
 namespace AndroidXamarinChat
 {
-	[Activity (Label = "AndroidXamarinChat", MainLauncher = true, Icon = "@mipmap/icon",
+	[Activity (Label = "Chat (Xamarin)", MainLauncher = true, Icon = "@mipmap/ic_launcher",
 		Theme="@style/ChatApp", ScreenOrientation = ScreenOrientation.Portrait)]
 	public class MainActivity : AppCompatActivity
 	{
@@ -34,9 +36,23 @@ namespace AndroidXamarinChat
 		private List<string> messageHistoryDataSet;
 	    private readonly List<Exception> errors = new List<Exception> ();
 
-	    private ServerEventConnect lastConnectMessage;
 	    private ChatClient client;
 		private ChatCmdReciever cmdReceiver;
+
+		protected override void OnNewIntent (Android.Content.Intent intent)
+		{
+			base.OnNewIntent (intent);
+		}
+
+		public override void OnActivityReenter (int resultCode, Android.Content.Intent data)
+		{
+			base.OnActivityReenter (resultCode, data);
+		}
+
+		protected override void OnResume ()
+		{
+			base.OnResume ();
+		}
 
 		protected override void OnCreate(Bundle bundle)
 		{
@@ -44,7 +60,6 @@ namespace AndroidXamarinChat
 
 			// Set our view from the "main" layout resource
 			SetContentView(Resource.Layout.Main);
-
 			// Get our button from the layout resource,
 			// and attach an event to it
 			Button sendButton = FindViewById<Button>(Resource.Id.sendMessageButton);
@@ -62,15 +77,18 @@ namespace AndroidXamarinChat
 			messageHistoryAdapter = new ArrayAdapter (this, Android.Resource.Layout.SimpleListItem1, messageHistoryDataSet);
 			messageHistoryList.Adapter = messageHistoryAdapter;
 
-			cmdReceiver = new ChatCmdReciever (this, messageHistoryAdapter, "home");
 		    client = new ChatClient(new[] {"home"})
 		    {
-		        OnConnect = connectMsg => { lastConnectMessage = connectMsg; },
-		        OnException = error => { errors.Add(error); }
+		        OnConnect = connectMsg => { 
+					client.UpdateChatHistory(cmdReceiver).ConfigureAwait(false);
+				},
+		        OnException = error => { 
+					errors.Add(error); 
+				}
 		    };
 
 		    SetSupportActionBar(mToolbar);
-		    var leftMenuData = new List<string>(client.Channels) {"Create Channel+"};
+			var leftMenuData = new List<string>(client.Channels) {UIHelpers.CreateChannelLabel};
 		    mLeftAdapter = new ArrayAdapter<string>(this, Android.Resource.Layout.SimpleListItem1, leftMenuData);
 			mLeftDrawer.Adapter = mLeftAdapter;
 
@@ -94,18 +112,17 @@ namespace AndroidXamarinChat
 
 			mLeftDrawer.ItemClick += OnChannelClick;
             sendButton.Click += OnSendClick;
-			client.Resolver = new MessageResolver (cmdReceiver);
-			client.StartChat (cmdReceiver);			
 		}
 
 		public void OnChannelClick(object sender, AdapterView.ItemClickEventArgs e)
 		{
 			string itemText = mLeftDrawer.Adapter.GetItem(e.Position).ToString();
-			if(itemText == "Create Channel+") {
+			if(itemText == UIHelpers.CreateChannelLabel) {
 				var result = UIHelpers.ShowChannelDialog(this);
 				messageHistoryAdapter.Clear();
 				messageHistoryAdapter.NotifyDataSetChanged();
 				result.ContinueWith(ta => {
+					ta.Wait();
 					try{
 						string nChannel = ta.Result;
 						UIHelpers.AddChannelToDrawer(this,mLeftAdapter,nChannel);
@@ -131,7 +148,7 @@ namespace AndroidXamarinChat
 		        client.SendMessage(new PostChatToChannel
 		        {
 					Channel = cmdReceiver.CurrentChannel,
-		            From = lastConnectMessage.Id,
+					From = client.SubscriptionId,
 		            Message = messageBox.Text,
 		            Selector = "cmd.chat"
 		        });
@@ -180,20 +197,48 @@ namespace AndroidXamarinChat
 
 		protected override void OnSaveInstanceState (Bundle outState)
 		{
-		    outState.PutString("DrawerState", mDrawerLayout.IsDrawerOpen((int) GravityFlags.Left) ? "Opened" : "Closed");
+			ISharedPreferences prefs = PreferenceManager.GetDefaultSharedPreferences(this); 
+			ISharedPreferencesEditor editor = prefs.Edit();
+			editor.PutString ("Channels", client.Channels.Join (","));
+			editor.PutString ("LastChannel", cmdReceiver.CurrentChannel);
+			editor.Apply();
 		    base.OnSaveInstanceState (outState);
 		}
 
+
+		protected override void OnRestoreInstanceState (Bundle savedInstanceState)
+		{
+			base.OnRestoreInstanceState (savedInstanceState);
+		}
 	    protected override void OnPostCreate (Bundle savedInstanceState)
 		{
 			base.OnPostCreate (savedInstanceState);
 			mDrawerToggle.SyncState();
+			ISharedPreferences prefs = PreferenceManager.GetDefaultSharedPreferences(this); 
+			var channels = prefs.GetString ("Channels", null);
+			var lastChannel = prefs.GetString ("LastChannel", null);
+			cmdReceiver = new ChatCmdReciever (this, messageHistoryAdapter, lastChannel ?? "home");
+			if (channels != null) {
+				var chanArray = channels.Split (',');
+				client.Channels = chanArray;
+				UIHelpers.ResetChannelDrawer (this, mLeftAdapter, chanArray);
+			}
+			client.Resolver = new MessageResolver (cmdReceiver);
+			client.Connect ().ConfigureAwait (false);
 		}
 
 		public override void OnConfigurationChanged (Android.Content.Res.Configuration newConfig)
 		{
 			base.OnConfigurationChanged (newConfig);
 			mDrawerToggle.OnConfigurationChanged(newConfig);
+		}
+
+		protected override void Dispose (bool disposing)
+		{
+			if (disposing) {
+				client.Dispose ();
+			}
+			base.Dispose (disposing);
 		}
 	}
 }

@@ -11,6 +11,8 @@ namespace AndroidXamarinChat
 {
 	public class UIHelpers
 	{
+		public const string CreateChannelLabel = "Create Channel+";
+
 		public static Task<string> ShowChannelDialog(Activity activity)
 		{
 			var tcs = new TaskCompletionSource<string>();
@@ -66,6 +68,17 @@ namespace AndroidXamarinChat
 			parentActivity.RunOnUiThread (() => {
 				drawerAdapter.Insert (channelName, drawerAdapter.Count - 1);
 				drawerAdapter.NotifyDataSetChanged ();
+			});
+		}
+
+		public static void ResetChannelDrawer(Activity parentActivity, ArrayAdapter drawerAdapter, string[] channels)
+		{
+			parentActivity.RunOnUiThread(() => {
+				drawerAdapter.Clear();
+				for(int i = 0; i < channels.Length; i++) {
+					drawerAdapter.Add(channels[i]);
+				}
+				drawerAdapter.Add(CreateChannelLabel);
 			});
 		}
 	}

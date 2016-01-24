@@ -69,7 +69,7 @@
             android:choiceMode="singleChoice"
             android:divider="#818181"
             android:dividerHeight="1dp"
-            android:background="#E3F2FD" />
+            android:background="@android:color/white" />
         <ListView
             android:id="@+id/right_drawer"
             android:layout_width="240dp"
@@ -78,6 +78,6 @@
             android:choiceMode="singleChoice"
             android:divider="#E2E2E2"
             android:dividerHeight="1dp"
-            android:background="#9E9E9E" />
+            android:background="@android:color/white" />
     </android.support.v4.widget.DrawerLayout>
 </LinearLayout>

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using ServiceStack;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 
 namespace AndroidXamarinChat
 {
@@ -14,33 +15,24 @@ namespace AndroidXamarinChat
 			return chatMessage.FromName + ": " + chatMessage.Message + "\n";
 		}
 
-		public static Task UpdateChatHistory(this ChatClient client, string[] channels, ChatCmdReciever cmdReceiver)
+		public static async Task UpdateChatHistory(this ChatClient client,ChatCmdReciever cmdReceiver)
 		{
-			return Task.Run (() => {
-				var chatHistory = client.ServiceClient.Get(new GetChatHistory { Channels = channels});
-				cmdReceiver.FullHistory = new Dictionary<string, List<string>>();
-				chatHistory.Results.ForEach(message =>  {
-					if(!cmdReceiver.FullHistory.ContainsKey(message.Channel)) {
-						cmdReceiver.FullHistory.Add(message.Channel,new List<string>());
+			await Task.Run (async () => {
+				var httpClient = new HttpClient();
+				string chatHistoryJson = await httpClient.GetStringAsync(
+						"http://chat.servicestack.net/chathistory?Channels={0}&format=json".Fmt(client.Channels.Join(",")));
+				var chatHistory = chatHistoryJson.FromJson<GetChatHistoryResponse>();
+					
+				//var chatHistory = "http://chat.servicestack.net/chathistory?Channels={0}".Fmt(client.Channels.Join(",")).GetJsonFromUrl().FromJson<GetChatHistoryResponse>();
+				cmdReceiver.FullHistory = new Dictionary<string, List<string>> ();
+				chatHistory.Results.ForEach (message => {
+					if (!cmdReceiver.FullHistory.ContainsKey (message.Channel)) {
+						cmdReceiver.FullHistory.Add (message.Channel, new List<string> ());
 					}
-					cmdReceiver.FullHistory[message.Channel].Add(message.DisplayMessage());
+					cmdReceiver.FullHistory [message.Channel].Add (message.DisplayMessage ());
 				});
+				cmdReceiver.SyncAdapter ();
 			});
-		}
-
-		public static void ChangeChannel(this ChatClient client, string channel, ChatCmdReciever cmdReceiver)
-		{
-			var currentChannels = new List<string> (client.Channels);
-			if (currentChannels.Contains (channel)) {
-				cmdReceiver.ChangeChannel (channel);
-			} else {
-				var updatedChannels = new List<string> (client.Channels);
-				updatedChannels.Add (channel);
-				client.Channels = updatedChannels.ToArray ();
-				client.Restart ();
-				client.UpdateChatHistory (client.Channels, cmdReceiver);
-				cmdReceiver.ChangeChannel (channel);
-			}
 		}
 	}
 }

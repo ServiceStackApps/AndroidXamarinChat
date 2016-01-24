@@ -1659,7 +1659,10 @@ namespace AndroidXamarinChat
 			public const int design_snackbar_background = 2130837566;
 			
 			// aapt resource value: 0x7f02003f
-			public const int notification_template_icon_bg = 2130837567;
+			public const int ic_stat_icon = 2130837567;
+			
+			// aapt resource value: 0x7f020040
+			public const int notification_template_icon_bg = 2130837568;
 			
 			static Drawable()
 			{
@@ -2267,10 +2270,22 @@ namespace AndroidXamarinChat
 			public const int ic_action_refresh = 2130903041;
 			
 			// aapt resource value: 0x7f030002
-			public const int ic_menu = 2130903042;
+			public const int ic_launcher = 2130903042;
 			
 			// aapt resource value: 0x7f030003
-			public const int Icon = 2130903043;
+			public const int ic_menu = 2130903043;
+			
+			// aapt resource value: 0x7f030004
+			public const int Icon = 2130903044;
+			
+			// aapt resource value: 0x7f030005
+			public const int logo_blue = 2130903045;
+			
+			// aapt resource value: 0x7f030006
+			public const int logo_transparent = 2130903046;
+			
+			// aapt resource value: 0x7f030007
+			public const int logo_white_ = 2130903047;
 			
 			static Mipmap()
 			{

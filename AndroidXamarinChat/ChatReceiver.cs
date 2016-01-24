@@ -21,7 +21,7 @@ namespace AndroidXamarinChat
 
 		public void Announce(string message)
 		{
-
+			chatMessageHandler.Announce (message);
 		}
 
 		public void Toggle(string message) 
