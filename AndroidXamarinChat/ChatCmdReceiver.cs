@@ -13,26 +13,41 @@ namespace AndroidXamarinChat
 	{
 		private Activity parentActivity;
 		private ArrayAdapter messageAdapter;
-		public ChatCmdReciever(Activity parentActivity, ArrayAdapter messageAdapter)
+		public Dictionary<string,List<string>> FullHistory { get; set; }
+
+		public string CurrentChannel  { get; private set; }
+
+		public ChatCmdReciever(Activity parentActivity, ArrayAdapter messageAdapter, string initialChannel)
 		{
 			this.parentActivity = parentActivity;
 			this.messageAdapter = messageAdapter;
+			this.FullHistory = new Dictionary<string, List<string>> ();
+			this.CurrentChannel = initialChannel;
 		}
 
 		public void AppendMessage(ChatMessage chatMessage)
 		{
-			parentActivity.RunOnUiThread (() => {
-				messageAdapter.Add (chatMessage.DisplayMessage ());
-				messageAdapter.NotifyDataSetChanged ();
-			});
+			if (!FullHistory.ContainsKey (chatMessage.Channel)) {
+				FullHistory.Add (chatMessage.Channel, new List<string> ());
+			}
+			FullHistory [chatMessage.Channel].Add (chatMessage.DisplayMessage ());
+			if (chatMessage.Channel == this.CurrentChannel) {
+				parentActivity.RunOnUiThread (() => {
+					messageAdapter.Add (chatMessage.DisplayMessage ());
+					messageAdapter.NotifyDataSetChanged ();
+				});
+			}
 		}
 
-		public void ChangeChannel(string channel, List<ChatMessage> fullHistory)
+		public void ChangeChannel(string channel)
 		{
-			messageAdapter.Clear ();
-			fullHistory.ForEach (msg => {
-				if(msg.Channel == channel) {
-					messageAdapter.Add(msg.DisplayMessage());
+			this.CurrentChannel = channel;
+			parentActivity.RunOnUiThread (() => {
+				messageAdapter.Clear ();
+				if (FullHistory.ContainsKey (channel)) {
+					FullHistory [channel].ForEach (msg => {
+						messageAdapter.Add (msg);
+					});
 				}
 			});
 		}

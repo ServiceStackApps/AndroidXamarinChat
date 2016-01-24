@@ -82,6 +82,7 @@
     <Compile Include="ChatReceiver.cs" />
     <Compile Include="TvReciever.cs" />
     <Compile Include="ChatCmdReceiver.cs" />
+    <Compile Include="ChatClient.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />

@@ -46,21 +46,27 @@ namespace AndroidXamarinChat
 
 		private static void ShowKeyboard(Activity parentActivity, EditText userInput)
 		{
-			userInput.RequestFocus();
-			InputMethodManager imm = (InputMethodManager)parentActivity.GetSystemService(Context.InputMethodService);
-			imm.ToggleSoftInput(ShowFlags.Forced, 0);
+			parentActivity.RunOnUiThread (() => {
+				userInput.RequestFocus();
+				InputMethodManager imm = (InputMethodManager)parentActivity.GetSystemService(Context.InputMethodService);
+				imm.ToggleSoftInput(ShowFlags.Forced, 0);
+			});
 		}
 
 		private static void HideKeyboard(Activity parentActivity,EditText userInput)
 		{
-			InputMethodManager imm = (InputMethodManager)parentActivity.GetSystemService(Context.InputMethodService);
-			imm.HideSoftInputFromWindow(userInput.WindowToken, 0);
+			parentActivity.RunOnUiThread (() => {
+				InputMethodManager imm = (InputMethodManager)parentActivity.GetSystemService(Context.InputMethodService);
+				imm.HideSoftInputFromWindow(userInput.WindowToken, 0);
+			});
 		}
 
-		public static void AddChannelToDrawer(ArrayAdapter drawerAdapter, string channelName)
+		public static void AddChannelToDrawer(Activity parentActivity, ArrayAdapter drawerAdapter, string channelName)
 		{
-			drawerAdapter.Insert (channelName, drawerAdapter.Count - 1);
-			drawerAdapter.NotifyDataSetChanged ();
+			parentActivity.RunOnUiThread (() => {
+				drawerAdapter.Insert (channelName, drawerAdapter.Count - 1);
+				drawerAdapter.NotifyDataSetChanged ();
+			});
 		}
 	}
 }
