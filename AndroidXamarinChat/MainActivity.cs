@@ -215,8 +215,7 @@ namespace AndroidXamarinChat
 			editor.Apply();
 		    base.OnSaveInstanceState (outState);
 		}
-
-
+			
 		protected override void OnRestoreInstanceState (Bundle savedInstanceState)
 		{
 			base.OnRestoreInstanceState (savedInstanceState);

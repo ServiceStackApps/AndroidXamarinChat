@@ -8,11 +8,15 @@ namespace AndroidXamarinChat
 	public class ChatClient : ServerEventsClient
 	{
 		private const string baseUrl = "http://chat.servicestack.net/";
+
+		public JsonHttpClient JsonHttpClient { get; private set; }
+
 		public ChatClient (string[] channels)
 			: base (baseUrl, channels)
 		{
 			this.RegisterNamedReceiver<ChatReceiver> ("cmd");
 			this.RegisterNamedReceiver<TvReciever> ("tv");
+			JsonHttpClient = new JsonHttpClient (baseUrl);
 		}
 			
 		public void SendMessage(PostChatToChannel request)
