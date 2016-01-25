@@ -13,6 +13,8 @@ using System.Threading.Tasks;
 using Android.Content.PM;
 using Android.Preferences;
 using Android.Content;
+using Android.Graphics;
+using Android.Support.Design.Widget;
 
 namespace AndroidXamarinChat
 {
@@ -22,12 +24,11 @@ namespace AndroidXamarinChat
 	{
 		private ChatActionBarDrawerToggle mDrawerToggle;
 		private DrawerLayout mDrawerLayout;
-		private ListView mLeftDrawer;
 		private ListView mRightDrawer;
+	    private NavigationView navigationView;
 
 		private ListView messageHistoryList;
 
-		private ArrayAdapter mLeftAdapter;
 		private ArrayAdapter mRightAdapter;
 		private ArrayAdapter messageHistoryAdapter;
 		private List<string> mRightDataSet;
@@ -66,19 +67,31 @@ namespace AndroidXamarinChat
 			messageBox = FindViewById<EditText>(Resource.Id.message);
 			SupportToolbar mToolbar = FindViewById<SupportToolbar>(Resource.Id.toolbar);
 			mDrawerLayout = FindViewById<DrawerLayout>(Resource.Id.drawer_layout);
-			mLeftDrawer = FindViewById<ListView>(Resource.Id.left_drawer);
+			navigationView = FindViewById<NavigationView>(Resource.Id.nav_view);
 			mRightDrawer = FindViewById<ListView>(Resource.Id.right_drawer);
 			messageHistoryList = FindViewById<ListView>(Resource.Id.messageHistory);
+		    var navBackground = FindViewById<ImageView>(Resource.Id.nav_background);
+		    Task.Run(() =>
+		    {
+		        var bytes = "https://servicestack.net/img/slide/image01.jpg".GetBytesFromUrl();
+		        var bitmap = BitmapFactory.DecodeByteArray(bytes, 0, bytes.Length);
+		        this.RunOnUiThread(() =>
+		        {
+		            navBackground.SetImageBitmap(bitmap);
+		        });
+		    }).ConfigureAwait(false);
 
-			mLeftDrawer.Tag = 0;
+			navigationView.Tag = 0;
 			mRightDrawer.Tag = 1;
 
 			messageHistoryDataSet = new List<string> ();
 			messageHistoryAdapter = new ArrayAdapter (this, Android.Resource.Layout.SimpleListItem1, messageHistoryDataSet);
 			messageHistoryList.Adapter = messageHistoryAdapter;
 
-			ISharedPreferences prefs = PreferenceManager.GetDefaultSharedPreferences(this); 
-			var channels = prefs.GetString ("Channels", null);
+			ISharedPreferences prefs = PreferenceManager.GetDefaultSharedPreferences(this);
+		    prefs.Edit().Remove("Channels").Commit();
+		    prefs.Edit().Remove("LastChannel").Commit();
+            var channels = prefs.GetString ("Channels", null);
 			var lastChannel = prefs.GetString ("LastChannel", null);
 			cmdReceiver = new ChatCmdReciever (this, messageHistoryAdapter, lastChannel ?? "home");
 			string[] chanArray;
@@ -99,9 +112,6 @@ namespace AndroidXamarinChat
 		    };
 
 		    SetSupportActionBar(mToolbar);
-			var leftMenuData = new List<string>(client.Channels) {UIHelpers.CreateChannelLabel};
-		    mLeftAdapter = new ArrayAdapter<string>(this, Android.Resource.Layout.SimpleListItem1, leftMenuData);
-			mLeftDrawer.Adapter = mLeftAdapter;
 
 		    mRightDataSet = new List<string> {"Right Item 1", "Right Item 2"};
 		    mRightAdapter = new ArrayAdapter<string>(this, Android.Resource.Layout.SimpleListItem1, mRightDataSet);
@@ -121,13 +131,14 @@ namespace AndroidXamarinChat
 			mDrawerLayout.SetDrawerListener(mDrawerToggle);
 			mDrawerToggle.SyncState();
 
-			mLeftDrawer.ItemClick += OnChannelClick;
+		    navigationView.NavigationItemSelected += this.OnChannelClick;
             sendButton.Click += OnSendClick;
 		}
 
-		public void OnChannelClick(object sender, AdapterView.ItemClickEventArgs e)
+
+		public void OnChannelClick(object sender, NavigationView.NavigationItemSelectedEventArgs navigationItemSelectedEventArgs)
 		{
-			string itemText = mLeftDrawer.Adapter.GetItem(e.Position).ToString();
+		    string itemText = navigationItemSelectedEventArgs.MenuItem.TitleFormatted.ToString();
 			if(itemText == UIHelpers.CreateChannelLabel) {
 				var result = UIHelpers.ShowChannelDialog(this);
 				messageHistoryAdapter.Clear();
@@ -136,7 +147,9 @@ namespace AndroidXamarinChat
 					ta.Wait();
 					try{
 						string nChannel = ta.Result;
-						UIHelpers.AddChannelToDrawer(this,mLeftAdapter,nChannel);
+                        List<string> nChannels = new List<string>(client.Channels);
+                        nChannels.Add(nChannel);
+						UIHelpers.ResetChannelDrawer(this,navigationView,nChannels.ToArray());
 						client.ChangeChannel(ta.Result,cmdReceiver);
 					} catch (Exception ex) 
 					{
@@ -149,7 +162,7 @@ namespace AndroidXamarinChat
 				client.ChangeChannel(itemText, cmdReceiver);
 
 			}
-			mDrawerLayout.CloseDrawer(mLeftDrawer);
+			mDrawerLayout.CloseDrawer(navigationView);
 		}
 
 		public void OnSendClick(object sender, EventArgs e)
@@ -190,7 +203,7 @@ namespace AndroidXamarinChat
 		            {
 		                //Right Drawer is closed, open it and just in case close left drawer
 		                mDrawerLayout.OpenDrawer(mRightDrawer);
-		                mDrawerLayout.CloseDrawer(mLeftDrawer);
+		                mDrawerLayout.CloseDrawer(navigationView);
 		            }
 
 		            return true;
@@ -224,7 +237,7 @@ namespace AndroidXamarinChat
 		{
 			base.OnPostCreate (savedInstanceState);
 			mDrawerToggle.SyncState();
-			UIHelpers.ResetChannelDrawer (this, mLeftAdapter, client.Channels);
+			UIHelpers.ResetChannelDrawer (this, navigationView, client.Channels);
 			client.Resolver = new MessageResolver (cmdReceiver);
 			client.Connect ().ConfigureAwait (false);
 		}

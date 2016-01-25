@@ -6,18 +6,20 @@ using System.Globalization;
 using System.Threading.Tasks;
 using Android.Views.InputMethods;
 using Android.Content;
+using Android.Support.Design.Widget;
+using Android.Views;
 
 namespace AndroidXamarinChat
 {
 	public class UIHelpers
 	{
-		public const string CreateChannelLabel = "Create Channel+";
+		public const string CreateChannelLabel = "Create Channel";
 
 		public static Task<string> ShowChannelDialog(Activity activity)
 		{
 			var tcs = new TaskCompletionSource<string>();
 			var inputDialog = new Android.Support.V7.App.AlertDialog.Builder(activity);
-			var userInput = new EditText (activity);
+			var userInput = new EditText (inputDialog.Context);
 			userInput.Hint = "New Channel";
 			string selectedInput = "Create new channel";
 			userInput.Text = "";
@@ -63,23 +65,20 @@ namespace AndroidXamarinChat
 			});
 		}
 
-		public static void AddChannelToDrawer(Activity parentActivity, ArrayAdapter drawerAdapter, string channelName)
-		{
-			parentActivity.RunOnUiThread (() => {
-				drawerAdapter.Insert (channelName, drawerAdapter.Count - 1);
-				drawerAdapter.NotifyDataSetChanged ();
-			});
-		}
-
-		public static void ResetChannelDrawer(Activity parentActivity, ArrayAdapter drawerAdapter, string[] channels)
+		public static void ResetChannelDrawer(Activity parentActivity, NavigationView navigationView, string[] channels)
 		{
 			parentActivity.RunOnUiThread(() => {
-				drawerAdapter.Clear();
-				for(int i = 0; i < channels.Length; i++) {
-					drawerAdapter.Add(channels[i]);
-				}
-				drawerAdapter.Add(CreateChannelLabel);
-			});
+                var subMenu = navigationView.Menu.GetItem(0).SubMenu;
+                subMenu.Clear();
+                for (int i = 0; i < channels.Length; i++)
+			    {
+                    var chanMenuItem = subMenu.Add(Resource.Id.channelsGroup, Menu.None, Menu.None, channels[i]);
+                    chanMenuItem.SetIcon(Resource.Drawable.ic_discuss);
+                }
+                var createChanMenuItem = subMenu.Add(Resource.Id.channelsGroup, Menu.None, Menu.None, CreateChannelLabel);
+                createChanMenuItem.SetIcon(Resource.Drawable.ic_plus_circle_white_24dp);
+                navigationView.RefreshDrawableState();
+            });
 		}
 	}
 }

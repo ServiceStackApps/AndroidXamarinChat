@@ -20,7 +20,8 @@
     <!-- The Main Content View -->
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:fitsSystemWindows="true">
             <LinearLayout
                 android:orientation="vertical"
                 android:layout_width="match_parent"
@@ -61,15 +62,15 @@
                 android:transcriptMode="normal" />
         </RelativeLayout>
     <!-- The Left Navigation Drawer -->
-        <ListView
-            android:id="@+id/left_drawer"
-            android:layout_width="240dp"
+        <android.support.design.widget.NavigationView
+            android:id="@+id/nav_view"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_gravity="start"
-            android:choiceMode="singleChoice"
-            android:divider="#818181"
-            android:dividerHeight="1dp"
-            android:background="@android:color/white" />
+            android:fitsSystemWindows="true"
+            android:background="@android:color/white"
+            app:headerLayout="@layout/nav_header"
+            app:menu="@menu/drawer_view" />
         <ListView
             android:id="@+id/right_drawer"
             android:layout_width="240dp"
