@@ -16,6 +16,7 @@ using Android.Preferences;
 using Android.Content;
 using Android.Graphics;
 using Android.Support.Design.Widget;
+using Xamarin.Auth;
 
 namespace AndroidXamarinChat
 {
@@ -261,7 +262,19 @@ namespace AndroidXamarinChat
             UiHelpers.ResetChannelDrawer (this, navigationView, client.Channels);
 			client.Resolver = new MessageResolver (cmdReceiver);
 			client.Connect ().ConfigureAwait (false);
-		}
+            var ssAuth = new ServiceStackAuthenticator(ChatClient.BaseUrl, "twitter", (jsonServiceClient) =>
+            {
+                return new Account(string.Empty, jsonServiceClient.CookieContainer);
+            }, null, str => client.ServiceClient as JsonServiceClient);
+            StartActivity(ssAuth.GetUI(this));
+            ssAuth.Completed += (sender, args) =>
+            {
+                if (args.IsAuthenticated)
+                {
+                    client.Restart();
+                }
+            };
+        }
 
 		public override void OnConfigurationChanged (Android.Content.Res.Configuration newConfig)
 		{

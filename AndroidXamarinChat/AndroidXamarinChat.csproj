@@ -59,6 +59,9 @@
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
     <Reference Include="Mono.Android" />
+    <Reference Include="Xamarin.Auth.Android">
+      <HintPath>..\Components\xamarin.auth-1.2.3.1\lib\android\Xamarin.Auth.Android.dll</HintPath>
+    </Reference>
     <Reference Include="Xamarin.Insights">
       <HintPath>..\packages\Xamarin.Insights.1.10.6\lib\MonoAndroid10\Xamarin.Insights.dll</HintPath>
     </Reference>
@@ -104,6 +107,7 @@
     <Compile Include="ChatDtos.dtos.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="ChatActionBarDrawerToggle.cs" />
+    <Compile Include="ServiceStackAuthenticator.cs" />
     <Compile Include="UIHelpers.cs" />
     <Compile Include="ChatReceiver.cs" />
     <Compile Include="TvReciever.cs" />
@@ -165,6 +169,10 @@
     <XamarinComponentReference Include="rivets">
       <Version>1.0.5.1</Version>
       <Visible>False</Visible>
+    </XamarinComponentReference>
+    <XamarinComponentReference Include="xamarin.auth">
+      <Visible>False</Visible>
+      <Version>1.2.3.1</Version>
     </XamarinComponentReference>
   </ItemGroup>
   <ItemGroup>
