@@ -17,5 +17,20 @@ namespace AndroidXamarinChat
 			chatMessageHandler.ShowVideo (videoUrl);
 		}
 	}
+
+    public class CssReceiver : ServerEventReceiver
+    {
+        private readonly ChatCmdReciever chatMessageHandler;
+
+        public CssReceiver(ChatCmdReciever chatMessageHandler)
+        {
+            this.chatMessageHandler = chatMessageHandler;
+        }
+
+        public void BackgroundImage(string message)
+        {
+            chatMessageHandler.ChangeBackground(message);
+        }
+    }
 }
 

@@ -78,15 +78,9 @@ namespace AndroidXamarinChat
 			mRightDrawer = FindViewById<ListView>(Resource.Id.right_drawer);
 			messageHistoryList = FindViewById<ListView>(Resource.Id.messageHistory);
 		    var navBackground = FindViewById<ImageView>(Resource.Id.nav_background);
-		    Task.Run(() =>
-		    {
-		        var bytes = "https://servicestack.net/img/slide/image01.jpg".GetBytesFromUrl();
-		        var bitmap = BitmapFactory.DecodeByteArray(bytes, 0, bytes.Length);
-		        this.RunOnUiThread(() =>
-		        {
-		            navBackground.SetImageBitmap(bitmap);
-		        });
-		    }).ConfigureAwait(false);
+		    navBackground.UpdateImageViewSrc(this, "https://servicestack.net/img/slide/image01.jpg");
+		    var chatBackground = FindViewById<ImageView>(Resource.Id.chat_background);
+            chatBackground.UpdateImageViewSrc(this, "https://servicestack.net/img/slide/image01.jpg");
 
 			navigationView.Tag = 0;
 			mRightDrawer.Tag = 1;
@@ -96,8 +90,6 @@ namespace AndroidXamarinChat
 			messageHistoryList.Adapter = messageHistoryAdapter;
 
 			ISharedPreferences prefs = PreferenceManager.GetDefaultSharedPreferences(this);
-		    prefs.Edit().Remove("Channels").Commit();
-		    prefs.Edit().Remove("LastChannel").Commit();
             var channels = prefs.GetString ("Channels", null);
 			var lastChannel = prefs.GetString ("LastChannel", null);
 			cmdReceiver = new ChatCmdReciever (this, messageHistoryAdapter, lastChannel ?? "home");
@@ -112,7 +104,7 @@ namespace AndroidXamarinChat
 		    {
 		        OnConnect = connectMsg => { 
 					client.UpdateChatHistory(cmdReceiver).ConfigureAwait(false);
-                    UIHelpers.SelectChannel(this,navigationView,cmdReceiver.CurrentChannel);
+                    UiHelpers.SelectChannel(this,navigationView,cmdReceiver.CurrentChannel);
 				},
 		        OnException = error => { 
 					errors.Add(error); 
@@ -155,8 +147,8 @@ namespace AndroidXamarinChat
 		public void OnChannelClick(object sender, NavigationView.NavigationItemSelectedEventArgs navigationItemSelectedEventArgs)
 		{
 		    string itemText = navigationItemSelectedEventArgs.MenuItem.TitleFormatted.ToString();
-			if(itemText == UIHelpers.CreateChannelLabel) {
-				var result = UIHelpers.ShowChannelDialog(this);
+			if(itemText == UiHelpers.CreateChannelLabel) {
+				var result = UiHelpers.ShowChannelDialog(this);
 				messageHistoryAdapter.Clear();
 				messageHistoryAdapter.NotifyDataSetChanged();
 				result.ContinueWith(ta => {
@@ -165,10 +157,10 @@ namespace AndroidXamarinChat
 						string nChannel = ta.Result;
                         List<string> nChannels = new List<string>(client.Channels);
                         nChannels.Add(nChannel);
-						UIHelpers.ResetChannelDrawer(this,navigationView,nChannels.ToArray());
+                        UiHelpers.ResetChannelDrawer(this,navigationView,nChannels.ToArray());
 						client.ChangeChannel(ta.Result,cmdReceiver);
-                        //UIHelpers.SelectChannel(this, navigationView, nChannel);
-					} catch (Exception ex) 
+                        this.SaveChannelInfo();
+                    } catch (Exception ex) 
 					{
 						errors.Add(ex);
 					}					
@@ -176,8 +168,9 @@ namespace AndroidXamarinChat
 			} else {
 				//Change channel
 				client.ChangeChannel(itemText, cmdReceiver);
-			    UIHelpers.SelectChannel(this, navigationView, itemText);
-			}
+                UiHelpers.SelectChannel(this, navigationView, itemText);
+                this.SaveChannelInfo();
+            }
             mDrawerLayout.CloseDrawer(navigationView);
 		}
 
@@ -258,23 +251,24 @@ namespace AndroidXamarinChat
 
 		protected override void OnSaveInstanceState (Bundle outState)
 		{
-			ISharedPreferences prefs = PreferenceManager.GetDefaultSharedPreferences(this); 
-			ISharedPreferencesEditor editor = prefs.Edit();
-			editor.PutString ("Channels", client.Channels.Join (","));
-			editor.PutString ("LastChannel", cmdReceiver.CurrentChannel);
-			editor.Apply();
-		    base.OnSaveInstanceState (outState);
+		    this.SaveChannelInfo();
+            base.OnSaveInstanceState (outState);
 		}
+
+	    private void SaveChannelInfo()
+	    {
+            ISharedPreferences prefs = PreferenceManager.GetDefaultSharedPreferences(this);
+            ISharedPreferencesEditor editor = prefs.Edit();
+            editor.PutString("Channels", client.Channels.Join(","));
+            editor.PutString("LastChannel", cmdReceiver.CurrentChannel);
+            editor.Apply();
+        }
 			
-		protected override void OnRestoreInstanceState (Bundle savedInstanceState)
-		{
-			base.OnRestoreInstanceState (savedInstanceState);
-		}
 	    protected override void OnPostCreate (Bundle savedInstanceState)
 		{
 			base.OnPostCreate (savedInstanceState);
 			mDrawerToggle.SyncState();
-			UIHelpers.ResetChannelDrawer (this, navigationView, client.Channels);
+            UiHelpers.ResetChannelDrawer (this, navigationView, client.Channels);
 			client.Resolver = new MessageResolver (cmdReceiver);
 			client.Connect ().ConfigureAwait (false);
 		}
@@ -283,14 +277,6 @@ namespace AndroidXamarinChat
 		{
 			base.OnConfigurationChanged (newConfig);
 			mDrawerToggle.OnConfigurationChanged(newConfig);
-		}
-
-		protected override void Dispose (bool disposing)
-		{
-			if (disposing) {
-				client.Dispose ();
-			}
-			base.Dispose (disposing);
 		}
 	}
 }

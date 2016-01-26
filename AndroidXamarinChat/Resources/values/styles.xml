@@ -13,4 +13,6 @@
 
   <drawable name="item_bg_selected">#7AE8F7</drawable>
   <drawable name="white_color">#FFFFFF</drawable>
+  <drawable name="chat_list_item_bg">#CCFFFFFF</drawable>
+  <drawable name="chat_background_blend">#AAFFFFFF</drawable>
 </resources>

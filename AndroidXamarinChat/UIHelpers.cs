@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Android.Support.V7.App;
 using Android.Widget;
 using Android.App;
@@ -6,12 +7,14 @@ using System.Globalization;
 using System.Threading.Tasks;
 using Android.Views.InputMethods;
 using Android.Content;
+using Android.Graphics;
 using Android.Support.Design.Widget;
 using Android.Views;
+using ServiceStack;
 
 namespace AndroidXamarinChat
 {
-	public class UIHelpers
+	public static class UiHelpers
 	{
 		public const string CreateChannelLabel = "Create Channel";
 
@@ -99,6 +102,28 @@ namespace AndroidXamarinChat
                 }
                 
                 navigationView.RefreshDrawableState();
+            });
+        }
+
+	    public static void UpdateImageViewSrc(Activity activity, int imageViewRsc, string url)
+	    {
+            var imageView = activity.FindViewById<ImageView>(imageViewRsc);
+            imageView.UpdateImageViewSrc(activity, url);
+        }
+
+        private static readonly Dictionary<string,byte[]> BackgroundCache = new Dictionary<string, byte[]>(); 
+
+	    public static void UpdateImageViewSrc(this ImageView imageView,Activity activity, string url)
+	    {
+	        Task.Run(() =>
+	        {
+                var bytes = url.GetBytesFromUrl();
+                var bitmap = BitmapFactory.DecodeByteArray(bytes, 0, bytes.Length);
+                BackgroundCache.Add(url,bytes);
+                activity.RunOnUiThread(() =>
+                {
+                    imageView.SetImageBitmap(bitmap);
+                });
             });
         }
 	}

@@ -1092,6 +1092,9 @@ namespace AndroidXamarinChat
 			// aapt resource value: 0x7f0b0011
 			public const int button_material_light = 2131427345;
 			
+			// aapt resource value: 0x7f0b004e
+			public const int chat_list_drawable = 2131427406;
+			
 			// aapt resource value: 0x7f0b003a
 			public const int design_fab_shadow_end_color = 2131427386;
 			
@@ -1131,11 +1134,11 @@ namespace AndroidXamarinChat
 			// aapt resource value: 0x7f0b0015
 			public const int dim_foreground_material_light = 2131427349;
 			
-			// aapt resource value: 0x7f0b004e
-			public const int drawer_item = 2131427406;
-			
 			// aapt resource value: 0x7f0b004f
-			public const int drawer_item_bg = 2131427407;
+			public const int drawer_item = 2131427407;
+			
+			// aapt resource value: 0x7f0b0050
+			public const int drawer_item_bg = 2131427408;
 			
 			// aapt resource value: 0x7f0b0016
 			public const int foreground_material_dark = 2131427350;
@@ -1242,11 +1245,11 @@ namespace AndroidXamarinChat
 			// aapt resource value: 0x7f0b0037
 			public const int switch_thumb_disabled_material_light = 2131427383;
 			
-			// aapt resource value: 0x7f0b0050
-			public const int switch_thumb_material_dark = 2131427408;
-			
 			// aapt resource value: 0x7f0b0051
-			public const int switch_thumb_material_light = 2131427409;
+			public const int switch_thumb_material_dark = 2131427409;
+			
+			// aapt resource value: 0x7f0b0052
+			public const int switch_thumb_material_light = 2131427410;
 			
 			// aapt resource value: 0x7f0b0038
 			public const int switch_thumb_normal_material_dark = 2131427384;
@@ -1760,6 +1763,12 @@ namespace AndroidXamarinChat
 			// aapt resource value: 0x7f02003d
 			public const int abc_textfield_search_material = 2130837565;
 			
+			// aapt resource value: 0x7f02004b
+			public const int chat_background_blend = 2130837579;
+			
+			// aapt resource value: 0x7f02004a
+			public const int chat_list_item_bg = 2130837578;
+			
 			// aapt resource value: 0x7f02003e
 			public const int design_fab_background = 2130837566;
 			
@@ -1896,6 +1905,9 @@ namespace AndroidXamarinChat
 			// aapt resource value: 0x7f0c0081
 			public const int channelsItemRoot = 2131492993;
 			
+			// aapt resource value: 0x7f0c006a
+			public const int chat_background = 2131492970;
+			
 			// aapt resource value: 0x7f0c004f
 			public const int checkbox = 2131492943;
 			
@@ -1998,8 +2010,8 @@ namespace AndroidXamarinChat
 			// aapt resource value: 0x7f0c007b
 			public const int line3 = 2131492987;
 			
-			// aapt resource value: 0x7f0c006a
-			public const int linearLayout2 = 2131492970;
+			// aapt resource value: 0x7f0c006b
+			public const int linearLayout2 = 2131492971;
 			
 			// aapt resource value: 0x7f0c000a
 			public const int listMode = 2131492874;
@@ -2010,8 +2022,8 @@ namespace AndroidXamarinChat
 			// aapt resource value: 0x7f0c0075
 			public const int media_actions = 2131492981;
 			
-			// aapt resource value: 0x7f0c006b
-			public const int message = 2131492971;
+			// aapt resource value: 0x7f0c006c
+			public const int message = 2131492972;
 			
 			// aapt resource value: 0x7f0c006e
 			public const int messageHistory = 2131492974;
@@ -2112,8 +2124,8 @@ namespace AndroidXamarinChat
 			// aapt resource value: 0x7f0c0065
 			public const int select_dialog_listview = 2131492965;
 			
-			// aapt resource value: 0x7f0c006c
-			public const int sendMessageButton = 2131492972;
+			// aapt resource value: 0x7f0c006d
+			public const int sendMessageButton = 2131492973;
 			
 			// aapt resource value: 0x7f0c0050
 			public const int shortcut = 2131492944;
@@ -2165,9 +2177,6 @@ namespace AndroidXamarinChat
 			
 			// aapt resource value: 0x7f0c004a
 			public const int textSpacerNoButtons = 2131492938;
-			
-			// aapt resource value: 0x7f0c006d
-			public const int textView1 = 2131492973;
 			
 			// aapt resource value: 0x7f0c0078
 			public const int time = 2131492984;

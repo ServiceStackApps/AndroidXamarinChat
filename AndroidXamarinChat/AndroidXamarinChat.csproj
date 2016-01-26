@@ -224,4 +224,7 @@
   <ItemGroup>
     <AndroidResource Include="Resources\color\drawer_item_bg.xml" />
   </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\color\chat_list_drawable.xml" />
+  </ItemGroup>
 </Project>

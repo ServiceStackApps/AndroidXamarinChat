@@ -94,6 +94,12 @@ namespace AndroidXamarinChat
                 Message = message
             });
         }
+
+	    public void ChangeBackground(string message)
+	    {
+	        var url = message.StartsWith("url(") ? message.Substring(4, message.Length - 5) : message;
+	        UiHelpers.UpdateImageViewSrc(parentActivity,Resource.Id.nav_background, url);
+	    }
 	}
 
 	public class MessageResolver : IResolver
@@ -108,11 +114,15 @@ namespace AndroidXamarinChat
 		{
 			if (typeof(T) == typeof(ChatReceiver)) {
 				return (T)(new ChatReceiver (this.messageHandler) as object);
-			} else if (typeof(T) == typeof(TvReciever)) {
+			}
+            if (typeof(T) == typeof(TvReciever)) {
 				return (T)(new TvReciever (this.messageHandler) as object);
 			}
-			else
-				return typeof(T).CreateInstance<T> ();
+		    if (typeof (T) == typeof (CssReceiver)) {
+		        return (T)(new CssReceiver(this.messageHandler) as object);
+		    }
+			
+			return typeof(T).CreateInstance<T> ();
 		}
 	}
 }

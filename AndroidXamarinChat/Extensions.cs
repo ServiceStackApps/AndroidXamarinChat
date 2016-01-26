@@ -18,7 +18,7 @@ namespace AndroidXamarinChat
 		public static async Task UpdateChatHistory(this ChatClient client,ChatCmdReciever cmdReceiver)
 		{
 			await Task.Run (() => {
-				var chatHistory = client.JsonHttpClient.Get(new GetChatHistory { 
+				var chatHistory = client.ServiceClient.Get(new GetChatHistory { 
 					Channels = client.Channels
 				});
 				cmdReceiver.FullHistory = new Dictionary<string, List<string>> ();
