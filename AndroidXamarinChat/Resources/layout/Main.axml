@@ -45,6 +45,7 @@
                     android:layout_width="fill_parent"
                     android:layout_height="fill_parent"
                     android:gravity="bottom"
+                    android:layout_marginTop="2dp"
                     android:hint="Your message..." />
                 <Button
                     android:id="@+id/sendMessageButton"
@@ -63,7 +64,7 @@
                 android:gravity="bottom"
                 android:scrollbars="vertical"
                 android:scrollbarSize="10px"
-                android:layout_marginBottom="70dp"
+                android:layout_marginBottom="86dp"
                 android:stackFromBottom="true"
                 android:transcriptMode="normal" />
         </FrameLayout>

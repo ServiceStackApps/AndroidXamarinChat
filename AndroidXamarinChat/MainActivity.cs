@@ -47,21 +47,6 @@ namespace AndroidXamarinChat
             { "Play YouTube", "/tv.watch http://youtu.be/518XP8prwZo" }
         }; 
 
-		protected override void OnNewIntent (Android.Content.Intent intent)
-		{
-			base.OnNewIntent (intent);
-		}
-
-		public override void OnActivityReenter (int resultCode, Android.Content.Intent data)
-		{
-			base.OnActivityReenter (resultCode, data);
-		}
-
-		protected override void OnResume ()
-		{
-			base.OnResume ();
-		}
-
 		protected override void OnCreate(Bundle bundle)
 		{
 			base.OnCreate(bundle);
@@ -78,11 +63,18 @@ namespace AndroidXamarinChat
 			mRightDrawer = FindViewById<ListView>(Resource.Id.right_drawer);
 			messageHistoryList = FindViewById<ListView>(Resource.Id.messageHistory);
 		    var navBackground = FindViewById<ImageView>(Resource.Id.nav_background);
-		    navBackground.UpdateImageViewSrc(this, "https://servicestack.net/img/slide/image01.jpg");
-		    var chatBackground = FindViewById<ImageView>(Resource.Id.chat_background);
-            chatBackground.UpdateImageViewSrc(this, "https://servicestack.net/img/slide/image01.jpg");
+            var chatBackground = FindViewById<ImageView>(Resource.Id.chat_background);
+            "https://servicestack.net/img/slide/image01.jpg".GetImageBitmap().ContinueWith(t =>
+            {
+                var bitmap = t.Result;
+                this.RunOnUiThread(() =>
+                {
+                    navBackground.SetImageBitmap(bitmap);
+                    chatBackground.SetImageBitmap(bitmap);
+                });
+            });
 
-			navigationView.Tag = 0;
+            navigationView.Tag = 0;
 			mRightDrawer.Tag = 1;
 
 			messageHistoryDataSet = new List<string> ();
@@ -104,7 +96,6 @@ namespace AndroidXamarinChat
 		    {
 		        OnConnect = connectMsg => { 
 					client.UpdateChatHistory(cmdReceiver).ConfigureAwait(false);
-                    UiHelpers.SelectChannel(this,navigationView,cmdReceiver.CurrentChannel);
 				},
 		        OnException = error => { 
 					errors.Add(error); 
@@ -168,7 +159,6 @@ namespace AndroidXamarinChat
 			} else {
 				//Change channel
 				client.ChangeChannel(itemText, cmdReceiver);
-                UiHelpers.SelectChannel(this, navigationView, itemText);
                 this.SaveChannelInfo();
             }
             mDrawerLayout.CloseDrawer(navigationView);

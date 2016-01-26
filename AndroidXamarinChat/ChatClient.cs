@@ -28,7 +28,9 @@ namespace AndroidXamarinChat
 			if (cmdReceiver.FullHistory.ContainsKey (channel) && currentChannels.Contains (channel)) {
 				cmdReceiver.ChangeChannel (channel);
 			} else {
-				currentChannels.Add (channel);
+                if(!currentChannels.Contains(channel))
+				    currentChannels.Add (channel);
+
 				this.Channels = currentChannels.ToArray ();
 				if (Channels != null && Channels.Length > 0)
 					this.EventStreamUri = this.EventStreamUri

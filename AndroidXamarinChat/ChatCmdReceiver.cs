@@ -98,8 +98,18 @@ namespace AndroidXamarinChat
 	    public void ChangeBackground(string message)
 	    {
 	        var url = message.StartsWith("url(") ? message.Substring(4, message.Length - 5) : message;
-	        UiHelpers.UpdateImageViewSrc(parentActivity,Resource.Id.nav_background, url);
-	    }
+	        url.GetImageBitmap().ContinueWith(t =>
+             {
+                 var bitmap = t.Result;
+                 var navBackground = parentActivity.FindViewById<ImageView>(Resource.Id.nav_background);
+                 var chatBackground = parentActivity.FindViewById<ImageView>(Resource.Id.chat_background);
+                 parentActivity.RunOnUiThread(() =>
+                 {
+                     navBackground.SetImageBitmap(bitmap);
+                     chatBackground.SetImageBitmap(bitmap);
+                 });
+             });
+        }
 	}
 
 	public class MessageResolver : IResolver

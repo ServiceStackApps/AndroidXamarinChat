@@ -96,8 +96,11 @@ namespace AndroidXamarinChat
                     var item = subMenu.GetItem(i);
                     if (item.TitleFormatted.ToString() == channel)
                     {
-                        item.SetChecked(true);
-                        break;
+                        navigationView.SetCheckedItem(item.ItemId);
+                    }
+                    else
+                    {
+                        item.SetChecked(false);
                     }
                 }
                 
@@ -107,25 +110,41 @@ namespace AndroidXamarinChat
 
 	    public static void UpdateImageViewSrc(Activity activity, int imageViewRsc, string url)
 	    {
-            var imageView = activity.FindViewById<ImageView>(imageViewRsc);
-            imageView.UpdateImageViewSrc(activity, url);
-        }
+
+	        url.GetImageBitmap().ContinueWith(t =>
+	        {
+	            activity.RunOnUiThread(() =>
+	            {
+	                var bitmap = t.Result;
+	                var imageView = activity.FindViewById<ImageView>(imageViewRsc);
+	                imageView.SetImageBitmap(bitmap);
+	            });
+	        });
+	    }
 
         private static readonly Dictionary<string,byte[]> BackgroundCache = new Dictionary<string, byte[]>(); 
 
-	    public static void UpdateImageViewSrc(this ImageView imageView,Activity activity, string url)
+	    public static Task<Bitmap> GetImageBitmap(this string url)
 	    {
-	        Task.Run(() =>
+	        var task = new Task<Bitmap>(() =>
 	        {
-                var bytes = url.GetBytesFromUrl();
-                var bitmap = BitmapFactory.DecodeByteArray(bytes, 0, bytes.Length);
-                BackgroundCache.Add(url,bytes);
-                activity.RunOnUiThread(() =>
+                byte[] bytes;
+                if (BackgroundCache.ContainsKey(url))
                 {
-                    imageView.SetImageBitmap(bitmap);
-                });
+                    bytes = BackgroundCache[url];
+                }
+                else
+                {
+                    bytes = url.GetBytesFromUrl();
+                    BackgroundCache.Add(url, bytes);
+                }
+                var bitmap = BitmapFactory.DecodeByteArray(bytes, 0, bytes.Length);
+                return bitmap;
             });
-        }
+	        task.ConfigureAwait(false);
+            task.Start();
+            return task;
+	    }
 	}
 }
 
