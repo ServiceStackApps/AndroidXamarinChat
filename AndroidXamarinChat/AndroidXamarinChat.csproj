@@ -218,4 +218,10 @@
   <ItemGroup>
     <AndroidResource Include="Resources\drawable-xxxhdpi\ic_plus_circle_white_24dp.png" />
   </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\color\drawer_item.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\color\drawer_item_bg.xml" />
+  </ItemGroup>
 </Project>

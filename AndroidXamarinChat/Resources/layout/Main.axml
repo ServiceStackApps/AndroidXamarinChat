@@ -69,6 +69,9 @@
             android:layout_gravity="start"
             android:fitsSystemWindows="true"
             android:background="@android:color/white"
+            app:itemBackground="@color/drawer_item_bg"
+            app:itemIconTint="@color/drawer_item"
+            app:itemTextColor="@color/drawer_item"
             app:headerLayout="@layout/nav_header"
             app:menu="@menu/drawer_view" />
         <ListView

@@ -10,4 +10,7 @@
 	    <item name="spinBars">true</item>
 	    <item name="color">@android:color/white</item>
 	</style>
+
+  <drawable name="item_bg_selected">#7AE8F7</drawable>
+  <drawable name="white_color">#FFFFFF</drawable>
 </resources>

@@ -19,7 +19,7 @@ namespace AndroidXamarinChat
 			JsonHttpClient = new JsonHttpClient (baseUrl);
 		}
 			
-		public void SendMessage(PostChatToChannel request)
+		public void SendMessage(PostRawToChannel request)
 		{
 			this.ServiceClient.Post (request);
 		}
@@ -36,7 +36,8 @@ namespace AndroidXamarinChat
 					this.EventStreamUri = this.EventStreamUri
 						.AddQueryParam("channel", string.Join(",", Channels));
 				cmdReceiver.CurrentChannel = channel;
-				this.Restart ();
+                cmdReceiver.FullHistory.Add(channel,new List<string>());
+                this.Restart ();
 			}
 		}
 	}

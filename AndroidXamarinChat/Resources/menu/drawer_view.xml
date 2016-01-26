@@ -1,6 +1,6 @@
 ﻿<menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-  <item android:checkableBehavior="single" android:id="@+id/channelsItemRoot" android:title="Channels">
+  <item android:id="@+id/channelsItemRoot" android:title="Channels">
     <menu>
       <group android:checkableBehavior="single" android:id="@+id/channelsGroup">
 

@@ -5,6 +5,7 @@ using ServiceStack;
 using Chat;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using SupportToolbar = Android.Support.V7.Widget.Toolbar;
 using Android.Support.V7.App;
 using Android.Support.V4.Widget;
@@ -39,6 +40,12 @@ namespace AndroidXamarinChat
 
 	    private ChatClient client;
 		private ChatCmdReciever cmdReceiver;
+
+        private Dictionary<string,string> commands = new Dictionary<string, string>
+        {
+            {"Announce Hello","/cmd.announce Hello from Android"},
+            { "Play YouTube", "/tv.watch http://youtu.be/518XP8prwZo" }
+        }; 
 
 		protected override void OnNewIntent (Android.Content.Intent intent)
 		{
@@ -105,6 +112,7 @@ namespace AndroidXamarinChat
 		    {
 		        OnConnect = connectMsg => { 
 					client.UpdateChatHistory(cmdReceiver).ConfigureAwait(false);
+                    UIHelpers.SelectChannel(this,navigationView,cmdReceiver.CurrentChannel);
 				},
 		        OnException = error => { 
 					errors.Add(error); 
@@ -113,9 +121,17 @@ namespace AndroidXamarinChat
 
 		    SetSupportActionBar(mToolbar);
 
-		    mRightDataSet = new List<string> {"Right Item 1", "Right Item 2"};
+		    mRightDataSet = new List<string>(commands.Keys);
 		    mRightAdapter = new ArrayAdapter<string>(this, Android.Resource.Layout.SimpleListItem1, mRightDataSet);
 			mRightDrawer.Adapter = mRightAdapter;
+		    mRightDrawer.ItemClick += (sender, args) =>
+		    {
+                this.RunOnUiThread(() =>
+                {
+                    messageBox.Text = commands[mRightDataSet[args.Position]];
+                    mDrawerLayout.CloseDrawer(mRightDrawer);
+                });
+		    };
 
 			mDrawerToggle = new ChatActionBarDrawerToggle(
 				this,							//Host Activity
@@ -151,32 +167,53 @@ namespace AndroidXamarinChat
                         nChannels.Add(nChannel);
 						UIHelpers.ResetChannelDrawer(this,navigationView,nChannels.ToArray());
 						client.ChangeChannel(ta.Result,cmdReceiver);
+                        //UIHelpers.SelectChannel(this, navigationView, nChannel);
 					} catch (Exception ex) 
 					{
 						errors.Add(ex);
 					}					
 				});
 			} else {
-
 				//Change channel
 				client.ChangeChannel(itemText, cmdReceiver);
-
+			    UIHelpers.SelectChannel(this, navigationView, itemText);
 			}
-			mDrawerLayout.CloseDrawer(navigationView);
+            mDrawerLayout.CloseDrawer(navigationView);
 		}
 
 		public void OnSendClick(object sender, EventArgs e)
 		{
-		    Task.Run(() =>
+		    var hasSelector = messageBox.Text.StartsWith("/");
+		    string selector = hasSelector ? messageBox.Text.Substring(1).SplitOnFirst(" ")[0] : "cmd.chat";
+		    string message = hasSelector ? messageBox.Text.Substring(1).SplitOnFirst(" ")[1] : messageBox.Text;
+
+		    if (selector == "cmd.chat")
 		    {
-		        client.SendMessage(new PostChatToChannel
+		        Task.Run(() =>
 		        {
-					Channel = cmdReceiver.CurrentChannel,
-					From = client.SubscriptionId,
-		            Message = messageBox.Text,
-		            Selector = "cmd.chat"
+                    client.ServiceClient.Post(new PostChatToChannel
+                    {
+                        Channel = cmdReceiver.CurrentChannel,
+                        From = client.SubscriptionId,
+                        Message = message,
+                        Selector = selector
+                    });
+                });
+		    }
+		    else
+		    {
+		        Task.Run(() =>
+		        {
+		            client.ServiceClient.Post(new PostRawToChannel
+		            {
+		                Channel = cmdReceiver.CurrentChannel,
+		                From = client.SubscriptionId,
+		                Message = message,
+		                Selector = selector
+		            });
 		        });
-		    });
+		    }
+
 		    RunOnUiThread(() => {
 		        messageBox.Text = "";
 		    });

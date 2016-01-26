@@ -74,12 +74,33 @@ namespace AndroidXamarinChat
 			    {
                     var chanMenuItem = subMenu.Add(Resource.Id.channelsGroup, Menu.None, Menu.None, channels[i]);
                     chanMenuItem.SetIcon(Resource.Drawable.ic_discuss);
-                }
+			        chanMenuItem.SetCheckable(true);
+			        chanMenuItem.SetEnabled(true);
+			    }
                 var createChanMenuItem = subMenu.Add(Resource.Id.channelsGroup, Menu.None, Menu.None, CreateChannelLabel);
                 createChanMenuItem.SetIcon(Resource.Drawable.ic_plus_circle_white_24dp);
                 navigationView.RefreshDrawableState();
             });
 		}
+
+	    public static void SelectChannel(Activity parentActivity, NavigationView navigationView, string channel)
+	    {
+            parentActivity.RunOnUiThread(() =>
+            {
+                var subMenu = navigationView.Menu.GetItem(0).SubMenu;
+                for (int i = 0; i < subMenu.Size(); i++)
+                {
+                    var item = subMenu.GetItem(i);
+                    if (item.TitleFormatted.ToString() == channel)
+                    {
+                        item.SetChecked(true);
+                        break;
+                    }
+                }
+                
+                navigationView.RefreshDrawableState();
+            });
+        }
 	}
 }
 
