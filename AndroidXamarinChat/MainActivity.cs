@@ -20,7 +20,7 @@ using Xamarin.Auth;
 
 namespace AndroidXamarinChat
 {
-	[Activity (Label = "Chat (Xamarin)", MainLauncher = true, Icon = "@mipmap/ic_launcher",
+	[Activity (Label = "Chat (Xamarin)", Icon = "@mipmap/ic_launcher",
 		Theme="@style/ChatApp", ScreenOrientation = ScreenOrientation.Portrait)]
 	public class MainActivity : AppCompatActivity
 	{
