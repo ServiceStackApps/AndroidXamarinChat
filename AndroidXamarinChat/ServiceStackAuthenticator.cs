@@ -10,26 +10,24 @@ namespace AndroidXamarinChat
     public class ServiceStackAuthenticator : WebAuthenticator
     {
         readonly Uri authUrl;
+        private readonly string serviceStackBaseUrl;
         readonly Func<ServiceClientBase, Account> getCustomUserDetails;
-        readonly Func<Uri, bool> successUriPredicate;
-        readonly ServiceClientBase jsonServiceClient;
+        ServiceClientBase jsonServiceClient;
+
+        public Func<string, ServiceClientBase> ServiceClientFactory { get; set; }
+        public Func<Uri,bool> OnSuccessPredicate { get; set; }
         Account account;
 
-        public ServiceStackAuthenticator(string serviceStackBaseUrl, string provider,
-            Func<ServiceClientBase, Account> getUserDetails,
-            Func<Uri, bool> successUriPredicate = null,
-            Func<string, ServiceClientBase> serviceClientFactory = null)
+        public ServiceStackAuthenticator(string serviceStackBaseUrl, 
+            string provider,
+            Func<ServiceClientBase, Account> getUserDetails)
         {
-            this.Title = "Twitter / Authorize Chat";
             authUrl = new Uri(serviceStackBaseUrl + "/auth/" + provider);
-            jsonServiceClient = serviceClientFactory != null ?
-                serviceClientFactory(serviceStackBaseUrl) :
-                new JsonServiceClient(serviceStackBaseUrl);
-            this.successUriPredicate = successUriPredicate;
             if (getUserDetails == null)
             {
                 throw new ArgumentNullException(nameof(getUserDetails));
             }
+            this.serviceStackBaseUrl = serviceStackBaseUrl;
             getCustomUserDetails = getUserDetails;
         }
 
@@ -40,9 +38,11 @@ namespace AndroidXamarinChat
 
         public override void OnPageLoading(Uri url)
         {
-            bool uriTestResult = successUriPredicate != null
-                ? successUriPredicate(url)
-                : (url.Fragment.Contains("s=1") || url.Query.Contains("s=1"));
+            bool uriTestResult = OnSuccessPredicate != null
+                ? OnSuccessPredicate(url)
+                : url.Fragment.Contains("s=1") || url.Query.Contains("s=1");
+
+            jsonServiceClient = ServiceClientFactory == null ? new JsonServiceClient(serviceStackBaseUrl) : ServiceClientFactory(serviceStackBaseUrl);
 
             if (authUrl.Host == url.Host && uriTestResult)
             {

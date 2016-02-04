@@ -26,7 +26,7 @@
                 android:layout_width="80dp"
                 android:layout_height="80dp"
                 android:paddingLeft="20dp"
-                android:src="@drawable/ic_no_profile64" />
+                android:src="@drawable/ic_no_profile" />
         <TextView
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
