@@ -1824,8 +1824,8 @@ namespace AndroidXamarinChat
 		public partial class Id
 		{
 			
-			// aapt resource value: 0x7f0c0075
-			public const int action0 = 2131492981;
+			// aapt resource value: 0x7f0c0077
+			public const int action0 = 2131492983;
 			
 			// aapt resource value: 0x7f0c0057
 			public const int action_bar = 2131492951;
@@ -1851,11 +1851,11 @@ namespace AndroidXamarinChat
 			// aapt resource value: 0x7f0c0058
 			public const int action_context_bar = 2131492952;
 			
-			// aapt resource value: 0x7f0c0079
-			public const int action_divider = 2131492985;
+			// aapt resource value: 0x7f0c007b
+			public const int action_divider = 2131492987;
 			
-			// aapt resource value: 0x7f0c0083
-			public const int action_help = 2131492995;
+			// aapt resource value: 0x7f0c0085
+			public const int action_help = 2131492997;
 			
 			// aapt resource value: 0x7f0c0002
 			public const int action_menu_divider = 2131492866;
@@ -1899,8 +1899,8 @@ namespace AndroidXamarinChat
 			// aapt resource value: 0x7f0c004d
 			public const int buttonPanel = 2131492941;
 			
-			// aapt resource value: 0x7f0c0076
-			public const int cancel_action = 2131492982;
+			// aapt resource value: 0x7f0c0078
+			public const int cancel_action = 2131492984;
 			
 			// aapt resource value: 0x7f0c0029
 			public const int center = 2131492905;
@@ -1911,11 +1911,11 @@ namespace AndroidXamarinChat
 			// aapt resource value: 0x7f0c002b
 			public const int center_vertical = 2131492907;
 			
-			// aapt resource value: 0x7f0c0085
-			public const int channelsGroup = 2131492997;
+			// aapt resource value: 0x7f0c0087
+			public const int channelsGroup = 2131492999;
 			
-			// aapt resource value: 0x7f0c0084
-			public const int channelsItemRoot = 2131492996;
+			// aapt resource value: 0x7f0c0086
+			public const int channelsItemRoot = 2131492998;
 			
 			// aapt resource value: 0x7f0c006d
 			public const int chat_background = 2131492973;
@@ -1923,8 +1923,8 @@ namespace AndroidXamarinChat
 			// aapt resource value: 0x7f0c004f
 			public const int checkbox = 2131492943;
 			
-			// aapt resource value: 0x7f0c007c
-			public const int chronometer = 2131492988;
+			// aapt resource value: 0x7f0c007e
+			public const int chronometer = 2131492990;
 			
 			// aapt resource value: 0x7f0c0031
 			public const int clip_horizontal = 2131492913;
@@ -1965,8 +1965,8 @@ namespace AndroidXamarinChat
 			// aapt resource value: 0x7f0c001a
 			public const int end = 2131492890;
 			
-			// aapt resource value: 0x7f0c0081
-			public const int end_padder = 2131492993;
+			// aapt resource value: 0x7f0c0083
+			public const int end_padder = 2131492995;
 			
 			// aapt resource value: 0x7f0c0022
 			public const int enterAlways = 2131492898;
@@ -2010,8 +2010,11 @@ namespace AndroidXamarinChat
 			// aapt resource value: 0x7f0c003f
 			public const int image = 2131492927;
 			
-			// aapt resource value: 0x7f0c0080
-			public const int info = 2131492992;
+			// aapt resource value: 0x7f0c0075
+			public const int imgProfile = 2131492981;
+			
+			// aapt resource value: 0x7f0c0082
+			public const int info = 2131492994;
 			
 			// aapt resource value: 0x7f0c0039
 			public const int italic = 2131492921;
@@ -2019,11 +2022,11 @@ namespace AndroidXamarinChat
 			// aapt resource value: 0x7f0c002d
 			public const int left = 2131492909;
 			
-			// aapt resource value: 0x7f0c007a
-			public const int line1 = 2131492986;
+			// aapt resource value: 0x7f0c007c
+			public const int line1 = 2131492988;
 			
-			// aapt resource value: 0x7f0c007e
-			public const int line3 = 2131492990;
+			// aapt resource value: 0x7f0c0080
+			public const int line3 = 2131492992;
 			
 			// aapt resource value: 0x7f0c006e
 			public const int linearLayout2 = 2131492974;
@@ -2037,8 +2040,8 @@ namespace AndroidXamarinChat
 			// aapt resource value: 0x7f0c0068
 			public const int loginToolbar = 2131492968;
 			
-			// aapt resource value: 0x7f0c0078
-			public const int media_actions = 2131492984;
+			// aapt resource value: 0x7f0c007a
+			public const int media_actions = 2131492986;
 			
 			// aapt resource value: 0x7f0c006f
 			public const int message = 2131492975;
@@ -2082,8 +2085,8 @@ namespace AndroidXamarinChat
 			// aapt resource value: 0x7f0c0006
 			public const int progress_horizontal = 2131492870;
 			
-			// aapt resource value: 0x7f0c0082
-			public const int psts_tab_title = 2131492994;
+			// aapt resource value: 0x7f0c0084
+			public const int psts_tab_title = 2131492996;
 			
 			// aapt resource value: 0x7f0c0051
 			public const int radio = 2131492945;
@@ -2175,8 +2178,8 @@ namespace AndroidXamarinChat
 			// aapt resource value: 0x7f0c002f
 			public const int start = 2131492911;
 			
-			// aapt resource value: 0x7f0c0077
-			public const int status_bar_latest_event_content = 2131492983;
+			// aapt resource value: 0x7f0c0079
+			public const int status_bar_latest_event_content = 2131492985;
 			
 			// aapt resource value: 0x7f0c0062
 			public const int submit_area = 2131492962;
@@ -2184,17 +2187,17 @@ namespace AndroidXamarinChat
 			// aapt resource value: 0x7f0c000c
 			public const int tabMode = 2131492876;
 			
-			// aapt resource value: 0x7f0c007f
-			public const int text = 2131492991;
+			// aapt resource value: 0x7f0c0081
+			public const int text = 2131492993;
 			
-			// aapt resource value: 0x7f0c007d
-			public const int text2 = 2131492989;
+			// aapt resource value: 0x7f0c007f
+			public const int text2 = 2131492991;
 			
 			// aapt resource value: 0x7f0c004a
 			public const int textSpacerNoButtons = 2131492938;
 			
-			// aapt resource value: 0x7f0c007b
-			public const int time = 2131492987;
+			// aapt resource value: 0x7f0c007d
+			public const int time = 2131492989;
 			
 			// aapt resource value: 0x7f0c0043
 			public const int title = 2131492931;
@@ -2211,14 +2214,17 @@ namespace AndroidXamarinChat
 			// aapt resource value: 0x7f0c0045
 			public const int topPanel = 2131492933;
 			
+			// aapt resource value: 0x7f0c0076
+			public const int txtUserName = 2131492982;
+			
 			// aapt resource value: 0x7f0c0008
 			public const int up = 2131492872;
 			
 			// aapt resource value: 0x7f0c0013
 			public const int useLogo = 2131492883;
 			
-			// aapt resource value: 0x7f0c0086
-			public const int usersGroup = 2131492998;
+			// aapt resource value: 0x7f0c0088
+			public const int usersGroup = 2131493000;
 			
 			// aapt resource value: 0x7f0c0009
 			public const int view_offset_helper = 2131492873;

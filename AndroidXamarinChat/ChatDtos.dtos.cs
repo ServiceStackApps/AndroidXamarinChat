@@ -1,7 +1,8 @@
 /* Options:
-Date: 2016-01-21 03:41:54
+Date: 2016-02-04 18:10:54
 Version: 4.00
-BaseUrl: http://chat.servicestack.net
+Tip: To override a DTO option, remove "//" prefix before updating
+BaseUrl: http://localhost:1337
 
 //GlobalNamespace: 
 //MakePartial: True
@@ -67,6 +68,40 @@ namespace Chat
 
         public virtual List<ChatMessage> Results { get; set; }
         public virtual ResponseStatus ResponseStatus { get; set; }
+    }
+
+    [Route("/account")]
+    public partial class GetUserDetails
+        : IReturn<GetUserDetailsResponse>
+    {
+    }
+
+    public partial class GetUserDetailsResponse
+    {
+        public virtual string Provider { get; set; }
+        public virtual string UserId { get; set; }
+        public virtual string UserName { get; set; }
+        public virtual string FullName { get; set; }
+        public virtual string DisplayName { get; set; }
+        public virtual string FirstName { get; set; }
+        public virtual string LastName { get; set; }
+        public virtual string Company { get; set; }
+        public virtual string Email { get; set; }
+        public virtual string PhoneNumber { get; set; }
+        public virtual DateTime? BirthDate { get; set; }
+        public virtual string BirthDateRaw { get; set; }
+        public virtual string Address { get; set; }
+        public virtual string Address2 { get; set; }
+        public virtual string City { get; set; }
+        public virtual string State { get; set; }
+        public virtual string Country { get; set; }
+        public virtual string Culture { get; set; }
+        public virtual string Gender { get; set; }
+        public virtual string Language { get; set; }
+        public virtual string MailAddress { get; set; }
+        public virtual string Nickname { get; set; }
+        public virtual string PostalCode { get; set; }
+        public virtual string TimeZone { get; set; }
     }
 
     [Route("/channels/{Channel}/chat")]

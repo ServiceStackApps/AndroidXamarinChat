@@ -81,6 +81,9 @@ namespace AndroidXamarinChat
 			messageHistoryAdapter = new ArrayAdapter (this, Android.Resource.Layout.SimpleListItem1, messageHistoryDataSet);
 			messageHistoryList.Adapter = messageHistoryAdapter;
 
+		    var txtUser = FindViewById<TextView>(Resource.Id.txtUserName);
+		    var imgProfile = FindViewById<ImageView>(Resource.Id.imgProfile);
+
 			ISharedPreferences prefs = PreferenceManager.GetDefaultSharedPreferences(this);
             var channels = prefs.GetString ("Channels", null);
 			var lastChannel = prefs.GetString ("LastChannel", null);
@@ -96,7 +99,18 @@ namespace AndroidXamarinChat
 		    {
 		        OnConnect = connectMsg => { 
 					client.UpdateChatHistory(cmdReceiver).ConfigureAwait(false);
-				},
+		            this.RunOnUiThread(() =>
+		            {
+		                txtUser.Text = connectMsg.DisplayName;
+		            });
+		            connectMsg.ProfileUrl.GetImageBitmap().ContinueWith(bitmap =>
+		            {
+                        this.RunOnUiThread(() =>
+                        {
+                            imgProfile.SetImageBitmap(bitmap.Result);
+                        });
+		            });
+		        },
 		        OnException = error => { 
 					errors.Add(error); 
 				}
@@ -257,13 +271,35 @@ namespace AndroidXamarinChat
 	    protected override void OnPostCreate (Bundle savedInstanceState)
 		{
 			base.OnPostCreate (savedInstanceState);
+	        UpdateCookiesFromIntent();
+
+            //TODO Check if cookie still valid, if not throw back to login activity.
+
 			mDrawerToggle.SyncState();
             UiHelpers.ResetChannelDrawer (this, navigationView, client.Channels);
 			client.Resolver = new MessageResolver (cmdReceiver);
 			client.Connect ().ConfigureAwait (false);
         }
 
-		public override void OnConfigurationChanged (Android.Content.Res.Configuration newConfig)
+	    private void UpdateCookiesFromIntent()
+	    {
+	        if (this.Intent != null)
+	        {
+	            string cookieStr = this.Intent.GetStringExtra("SSCookie");
+	            if (cookieStr != null)
+	            {
+	                var cookies = cookieStr.Split(';');
+	                foreach (var c in cookies)
+	                {
+	                    var key = c.Split('=')[0].Trim();
+	                    var val = c.Split('=')[1].Trim();
+	                    client.ServiceClient.SetCookie(key, val);
+	                }
+	            }
+	        }
+	    }
+
+	    public override void OnConfigurationChanged (Android.Content.Res.Configuration newConfig)
 		{
 			base.OnConfigurationChanged (newConfig);
 			mDrawerToggle.OnConfigurationChanged(newConfig);

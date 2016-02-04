@@ -12,6 +12,7 @@ using Android.Runtime;
 using Android.Support.V7.App;
 using Android.Views;
 using Android.Widget;
+using Chat;
 using ServiceStack;
 using Xamarin.Auth;
 using SupportToolbar = Android.Support.V7.Widget.Toolbar;
@@ -37,17 +38,33 @@ namespace AndroidXamarinChat
 
             var btnTwitter = FindViewById<ImageButton>(Resource.Id.btnTwitter);
             var btnAnon = FindViewById<ImageButton>(Resource.Id.btnAnon);
-            var client = new JsonServiceClient("http://chat.servicestack.net/");
+            var client = new JsonServiceClient(ChatClient.BaseUrl);
+            Account existingAccount;
+            // If cookies saved from twitter login, automatically continue to chat activity.
+            if (TryResolveAccount(client, out existingAccount))
+            {
+                client.CookieContainer = existingAccount.Cookies;
+                var intent = new Intent(this.BaseContext, typeof(MainActivity));
+                intent.AddFlags(ActivityFlags.ClearTop | ActivityFlags.NewTask);
+                intent.PutExtra("SSCookie", client.CookieContainer.GetCookieHeader(new Uri(ChatClient.BaseUrl)));
+                StartActivity(intent);
+                Finish();
+            }
 
             btnTwitter.Click += (sender, args) =>
             {
                 ISharedPreferences prefs = PreferenceManager.GetDefaultSharedPreferences(this);
                 var twitterAccess = prefs.GetString("TwitterAccessKey", null);
+                
                 if (twitterAccess == null)
                 {
                     var ssAuth = new ServiceStackAuthenticator(
                         ChatClient.BaseUrl,
-                        "twitter", jsonServiceClient => new Account(string.Empty, jsonServiceClient.CookieContainer));
+                        "twitter", jsonServiceClient =>
+                        {
+                            var userDetails = jsonServiceClient.Get(new GetUserDetails());
+                            return new Account(userDetails.UserName, jsonServiceClient.CookieContainer);
+                        });
                     ssAuth.Title = "Twitter / Authorize Chat";
                     ssAuth.ServiceClientFactory = baseUrl => client;
                     StartActivity(ssAuth.GetUI(this));
@@ -55,8 +72,8 @@ namespace AndroidXamarinChat
                     {
                         if (authArgs.IsAuthenticated)
                         {
-                            
-                            //Persist cookie
+                            AccountStore.Create(this).Save(authArgs.Account,"Twitter");
+                            StartActivity(typeof(MainActivity));
                         }
                     };
                 }
@@ -66,6 +83,19 @@ namespace AndroidXamarinChat
             {
                 StartActivity(typeof(MainActivity));
             };
+        }
+
+        private bool TryResolveAccount(ServiceClientBase client, out Account account)
+        {
+            account = null;
+            var existingTwitterAccount = AccountStore.Create(this).FindAccountsForService("Twitter");
+            var twitterAccount = existingTwitterAccount as Account[] ?? existingTwitterAccount.ToArray();
+            if (twitterAccount.Any())
+            {
+                account = twitterAccount.First();
+                return true;
+            }
+            return false;
         }
     }
 }

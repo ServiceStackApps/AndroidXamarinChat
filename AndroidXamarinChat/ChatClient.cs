@@ -7,8 +7,10 @@ namespace AndroidXamarinChat
 {
 	public class ChatClient : ServerEventsClient
 	{
-		public const string BaseUrl = "http://chat.servicestack.net/";
+		public const string BaseUrl = "http://chat.layoric.org/";
 
+        public string ProfileUrl { get; set; }
+        
 		public ChatClient (string[] channels)
 			: base (BaseUrl, channels)
 		{

@@ -20,19 +20,20 @@
                 android:id="@+id/drawer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
+                android:layout_margin="10dp"
                 android:orientation="vertical" >
             <ImageView
+                android:id="@+id/imgProfile"
                 android:layout_width="80dp"
                 android:layout_height="80dp"
-                android:paddingLeft="20dp"
                 android:src="@drawable/ic_no_profile" />
         <TextView
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:textColor="@android:color/black"
-      android:text="layoric"
-      android:textAppearance="@style/TextAppearance.AppCompat.Body1"/>
+          android:id="@+id/txtUserName"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:textColor="@android:color/white"
+          android:text="Guest"
+          android:textAppearance="@style/TextAppearance.AppCompat.Body1"/>
       
     </LinearLayout>
     
