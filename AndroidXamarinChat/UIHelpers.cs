@@ -28,7 +28,7 @@ namespace AndroidXamarinChat
 			var userInput = new EditText (inputDialog.Context);
 			userInput.Hint = "New Channel";
 			string selectedInput = "Create new channel";
-			userInput.Text = "";
+			userInput.Text = "general";
 			//SetEditTextStylings(userInput);
 			userInput.InputType = Android.Text.InputTypes.ClassText;
 			inputDialog.SetTitle(selectedInput);
