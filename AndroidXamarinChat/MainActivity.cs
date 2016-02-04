@@ -63,14 +63,13 @@ namespace AndroidXamarinChat
 			navigationView = FindViewById<NavigationView>(Resource.Id.nav_view);
 			mRightDrawer = FindViewById<ListView>(Resource.Id.right_drawer);
 			messageHistoryList = FindViewById<ListView>(Resource.Id.messageHistory);
-		    var navBackground = FindViewById<ImageView>(Resource.Id.nav_background);
             var chatBackground = FindViewById<ImageView>(Resource.Id.chat_background);
             "https://servicestack.net/img/slide/image01.jpg".GetImageBitmap().ContinueWith(t =>
             {
+                t.Wait();
                 var bitmap = t.Result;
                 this.RunOnUiThread(() =>
                 {
-                    navBackground.SetImageBitmap(bitmap);
                     chatBackground.SetImageBitmap(bitmap);
                 });
             });
@@ -266,7 +265,7 @@ namespace AndroidXamarinChat
             {
                 return new Account(string.Empty, jsonServiceClient.CookieContainer);
             }, null, str => client.ServiceClient as JsonServiceClient);
-            StartActivity(ssAuth.GetUI(this));
+            //StartActivity(ssAuth.GetUI(this));
             ssAuth.Completed += (sender, args) =>
             {
                 if (args.IsAuthenticated)

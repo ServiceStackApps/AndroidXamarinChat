@@ -4,19 +4,22 @@ using Android.Support.V7.App;
 using Android.Widget;
 using Android.App;
 using System.Globalization;
+using System.IO;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Android.Views.InputMethods;
 using Android.Content;
 using Android.Graphics;
 using Android.Support.Design.Widget;
 using Android.Views;
+using Java.Nio;
 using ServiceStack;
 
 namespace AndroidXamarinChat
 {
 	public static class UiHelpers
 	{
-		public const string CreateChannelLabel = "Create Channel";
+		public const string CreateChannelLabel = "      Join";
 
 		public static Task<string> ShowChannelDialog(Activity activity)
 		{
@@ -146,5 +149,57 @@ namespace AndroidXamarinChat
             return task;
 	    }
 	}
+
+    public static class UserImageHandler
+    {
+        public static Task<Bitmap> GetProfileImage(string url)
+        {
+            string imagePath = GetProfileImagePath(url);
+            bool getFromCache = !File.Exists(imagePath);
+            if (getFromCache)
+            {
+                return ReadImageFromCache(url);
+            }
+
+            var task = url.GetImageBitmap();
+            task.ContinueWith(t =>
+            {
+                CacheImage(url, t.Result);
+            });
+            return task;
+        }
+
+        private static string FileNameRegex = "[|\\\\?*<\\\\\":>\\[\\]/#\']";
+
+        public static string GetProfileImagePath(string url)
+        {
+            string path = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
+            string fileName = Regex.Replace(url, FileNameRegex, "", RegexOptions.IgnoreCase);
+            return System.IO.Path.Combine(path, fileName);
+        }
+
+        private static void CacheImage(string url, Bitmap bitmap)
+        {
+            string imagePath = GetProfileImagePath(url);
+            if (!File.Exists(imagePath))
+            {
+                ByteBuffer byteBuffer = ByteBuffer.Allocate(bitmap.ByteCount);
+                bitmap.CopyPixelsToBuffer(byteBuffer);
+                MemoryStream ms = new MemoryStream();
+                bitmap.Compress(Bitmap.CompressFormat.Png, 100, ms);
+                byte[] bytes = ms.ToBytes();
+                using (var fs = File.Create(imagePath))
+                {
+                    fs.Write(bytes,0,bytes.Length);
+                }
+            }
+        }
+
+        private static Task<Bitmap> ReadImageFromCache(string url)
+        {
+            string imagePath = GetProfileImagePath(url);
+            return BitmapFactory.DecodeFileAsync(imagePath);
+        }
+    }
 }
 

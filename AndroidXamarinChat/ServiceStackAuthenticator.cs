@@ -20,6 +20,7 @@ namespace AndroidXamarinChat
             Func<Uri, bool> successUriPredicate = null,
             Func<string, ServiceClientBase> serviceClientFactory = null)
         {
+            this.Title = "Twitter / Authorize Chat";
             authUrl = new Uri(serviceStackBaseUrl + "/auth/" + provider);
             jsonServiceClient = serviceClientFactory != null ?
                 serviceClientFactory(serviceStackBaseUrl) :

@@ -1,26 +1,45 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="192dp"
+    android:layout_height="128dp"
     android:background="?attr/colorPrimaryDark"
     android:theme="@style/ThemeOverlay.AppCompat.Dark"
     android:orientation="vertical"
     android:gravity="bottom">
+  <LinearLayout
+            android:id="@+id/drawer"
+            android:layout_width="240dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:gravity="center_vertical"
+            android:orientation="horizontal" >
+    
+    <!-- Profile pic-->
 
-  <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="top"
-        android:scaleType="centerCrop"
-        android:adjustViewBounds="true"
-        android:id="@+id/nav_background"
-        android:src="@drawable/nav_logo" />
-
-  <TextView
+      <LinearLayout
+                android:id="@+id/drawer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:orientation="vertical" >
+            <ImageView
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:paddingLeft="20dp"
+                android:src="@drawable/ic_no_profile64" />
+        <TextView
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:textColor="@android:color/black"
       android:text="layoric"
       android:textAppearance="@style/TextAppearance.AppCompat.Body1"/>
+      
+    </LinearLayout>
+    
+
+  </LinearLayout>
+
+
+
 
 </FrameLayout>

@@ -86,13 +86,6 @@ namespace AndroidXamarinChat
 
             Vibrator vibrator = (Vibrator)parentActivity.GetSystemService(Context.VibratorService);
             vibrator.Vibrate(1000);
-
-            this.AppendMessage(new ChatMessage
-            {
-                Channel = this.CurrentChannel,
-                FromName = "~Announcement~",
-                Message = message
-            });
         }
 
 	    public void ChangeBackground(string message)
@@ -101,11 +94,9 @@ namespace AndroidXamarinChat
 	        url.GetImageBitmap().ContinueWith(t =>
              {
                  var bitmap = t.Result;
-                 var navBackground = parentActivity.FindViewById<ImageView>(Resource.Id.nav_background);
                  var chatBackground = parentActivity.FindViewById<ImageView>(Resource.Id.chat_background);
                  parentActivity.RunOnUiThread(() =>
                  {
-                     navBackground.SetImageBitmap(bitmap);
                      chatBackground.SetImageBitmap(bitmap);
                  });
              });

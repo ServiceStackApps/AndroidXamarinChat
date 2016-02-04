@@ -1763,11 +1763,11 @@ namespace AndroidXamarinChat
 			// aapt resource value: 0x7f02003d
 			public const int abc_textfield_search_material = 2130837565;
 			
-			// aapt resource value: 0x7f02004b
-			public const int chat_background_blend = 2130837579;
+			// aapt resource value: 0x7f02004c
+			public const int chat_background_blend = 2130837580;
 			
-			// aapt resource value: 0x7f02004a
-			public const int chat_list_item_bg = 2130837578;
+			// aapt resource value: 0x7f02004b
+			public const int chat_list_item_bg = 2130837579;
 			
 			// aapt resource value: 0x7f02003e
 			public const int design_fab_background = 2130837566;
@@ -1782,28 +1782,31 @@ namespace AndroidXamarinChat
 			public const int ic_done = 2130837569;
 			
 			// aapt resource value: 0x7f020042
-			public const int ic_plus_circle_white_24dp = 2130837570;
+			public const int ic_no_profile64 = 2130837570;
 			
 			// aapt resource value: 0x7f020043
-			public const int ic_stat_icon = 2130837571;
-			
-			// aapt resource value: 0x7f020048
-			public const int item_bg_selected = 2130837576;
+			public const int ic_plus_circle_white_24dp = 2130837571;
 			
 			// aapt resource value: 0x7f020044
-			public const int nav_logo = 2130837572;
-			
-			// aapt resource value: 0x7f020047
-			public const int notification_template_icon_bg = 2130837575;
-			
-			// aapt resource value: 0x7f020045
-			public const int plus_circle = 2130837573;
-			
-			// aapt resource value: 0x7f020046
-			public const int psts_background_tab = 2130837574;
+			public const int ic_stat_icon = 2130837572;
 			
 			// aapt resource value: 0x7f020049
-			public const int white_color = 2130837577;
+			public const int item_bg_selected = 2130837577;
+			
+			// aapt resource value: 0x7f020045
+			public const int nav_logo = 2130837573;
+			
+			// aapt resource value: 0x7f020048
+			public const int notification_template_icon_bg = 2130837576;
+			
+			// aapt resource value: 0x7f020046
+			public const int plus_circle = 2130837574;
+			
+			// aapt resource value: 0x7f020047
+			public const int psts_background_tab = 2130837575;
+			
+			// aapt resource value: 0x7f02004a
+			public const int white_color = 2130837578;
 			
 			static Drawable()
 			{
@@ -1941,6 +1944,9 @@ namespace AndroidXamarinChat
 			// aapt resource value: 0x7f0c000d
 			public const int disableHome = 2131492877;
 			
+			// aapt resource value: 0x7f0c0071
+			public const int drawer = 2131492977;
+			
 			// aapt resource value: 0x7f0c0069
 			public const int drawer_layout = 2131492969;
 			
@@ -2036,9 +2042,6 @@ namespace AndroidXamarinChat
 			
 			// aapt resource value: 0x7f0c0014
 			public const int multiply = 2131492884;
-			
-			// aapt resource value: 0x7f0c0071
-			public const int nav_background = 2131492977;
 			
 			// aapt resource value: 0x7f0c006f
 			public const int nav_view = 2131492975;
