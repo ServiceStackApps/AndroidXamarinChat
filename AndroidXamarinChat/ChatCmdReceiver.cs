@@ -89,7 +89,14 @@ namespace AndroidXamarinChat
 
             Vibrator vibrator = (Vibrator)parentActivity.GetSystemService(Context.VibratorService);
             vibrator.Vibrate(1000);
-        }
+		    CancelNotification(notificationManager).ConfigureAwait(false);
+		}
+
+	    private async Task CancelNotification(NotificationManager notificationManager)
+	    {
+	        await Task.Delay(5000);
+            notificationManager.CancelAll();
+	    }
 
 	    public void ChangeBackground(string message)
 	    {

@@ -20,7 +20,7 @@ namespace AndroidXamarinChat
 			this.RegisterNamedReceiver<ChatReceiver> ("cmd");
 			this.RegisterNamedReceiver<TvReciever> ("tv");
 		    this.RegisterNamedReceiver<CssReceiver>("css");
-		    (this.ServiceClient as ServiceClientBase).HandleCallbackOnUiThread = false;
+            ServiceClient = new JsonHttpClient(BaseUrl);
 		}
 			
 		public void SendMessage(PostRawToChannel request)

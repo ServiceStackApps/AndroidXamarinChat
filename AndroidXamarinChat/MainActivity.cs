@@ -16,7 +16,10 @@ using Android.Preferences;
 using Android.Content;
 using Android.Graphics;
 using Android.Support.Design.Widget;
+using Java.Util.Logging;
+using ServiceStack.Logging;
 using Xamarin.Auth;
+using LogManager = ServiceStack.Logging.LogManager;
 
 namespace AndroidXamarinChat
 {
@@ -52,6 +55,8 @@ namespace AndroidXamarinChat
 		{
 			base.OnCreate(bundle);
 
+            LogManager.LogFactory = new GenericLogFactory(Console.WriteLine);
+
 			// Set our view from the "main" layout resource
 			SetContentView(Resource.Layout.Main);
 			// Get our button from the layout resource,
@@ -83,14 +88,10 @@ namespace AndroidXamarinChat
 
 		    var txtUser = FindViewById<TextView>(Resource.Id.txtUserName);
 		    var imgProfile = FindViewById<ImageView>(Resource.Id.imgProfile);
+		    var channels = new[] {"home"};
+			cmdReceiver = new ChatCmdReciever (this, messageHistoryAdapter, "home");
 
-			ISharedPreferences prefs = PreferenceManager.GetDefaultSharedPreferences(this);
-            var channels = prefs.GetString ("Channels", null);
-			var lastChannel = prefs.GetString ("LastChannel", null);
-			cmdReceiver = new ChatCmdReciever (this, messageHistoryAdapter, lastChannel ?? "home");
-		    var chanArray = channels != null ? channels.Split (',') : new[] {"home"};
-
-			client = new ChatClient(chanArray)
+			client = new ChatClient(channels)
 		    {
 		        OnConnect = connectMsg =>
 		        {
@@ -134,7 +135,6 @@ namespace AndroidXamarinChat
 		        throw;
 		    }
 		    
-
 		    SetSupportActionBar(mToolbar);
 
 		    mRightDataSet = new List<string>(commands.Keys);
@@ -183,7 +183,6 @@ namespace AndroidXamarinChat
                         nChannels.Add(nChannel);
                         UiHelpers.ResetChannelDrawer(this,navigationView,nChannels.ToArray());
 						client.ChangeChannel(ta.Result,cmdReceiver);
-                        SaveChannelInfo();
                     } catch (Exception ex) 
 					{
 						errors.Add(ex);
@@ -192,7 +191,6 @@ namespace AndroidXamarinChat
 			} else {
 				//Change channel
 				client.ChangeChannel(itemText, cmdReceiver);
-                SaveChannelInfo();
             }
             mDrawerLayout.CloseDrawer(navigationView);
 		}
@@ -205,17 +203,13 @@ namespace AndroidXamarinChat
 
 		    if (selector == "cmd.chat")
 		    {
-                JsonHttpClient httpClient = new JsonHttpClient(ChatClient.BaseUrl);
-		        httpClient.CookieContainer = (client.ServiceClient as ServiceClientBase).CookieContainer;
-		        var dto = new PostChatToChannel
+		        client.ServiceClient.PostAsync(new PostChatToChannel
 		        {
 		            Channel = cmdReceiver.CurrentChannel,
 		            From = client.SubscriptionId,
 		            Message = message,
 		            Selector = selector
-		        };
-
-		        httpClient.PostAsync(dto).ConfigureAwait(false);
+		        }).ConfigureAwait(false);
 		    }
 		    else if (selector == "logout")
 		    {
@@ -293,21 +287,6 @@ namespace AndroidXamarinChat
 			return base.OnCreateOptionsMenu (menu);
 		}
 
-		protected override void OnSaveInstanceState (Bundle outState)
-		{
-		    SaveChannelInfo();
-            base.OnSaveInstanceState (outState);
-		}
-
-	    private void SaveChannelInfo()
-	    {
-            ISharedPreferences prefs = PreferenceManager.GetDefaultSharedPreferences(this);
-            ISharedPreferencesEditor editor = prefs.Edit();
-            editor.PutString("Channels", client.Channels.Join(","));
-            editor.PutString("LastChannel", cmdReceiver.CurrentChannel);
-            editor.Apply();
-        }
-			
 	    protected override void OnPostCreate (Bundle savedInstanceState)
 		{
 			base.OnPostCreate (savedInstanceState);
@@ -341,5 +320,11 @@ namespace AndroidXamarinChat
 			base.OnConfigurationChanged (newConfig);
 			mDrawerToggle.OnConfigurationChanged(newConfig);
 		}
+
+	    protected override void OnDestroy()
+	    {
+	        client.Stop();
+	        base.OnDestroy();
+	    }
 	}
 }
