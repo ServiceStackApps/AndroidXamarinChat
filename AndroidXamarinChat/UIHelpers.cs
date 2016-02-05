@@ -56,42 +56,45 @@ namespace AndroidXamarinChat
 
 		private static void ShowKeyboard(Activity parentActivity, EditText userInput)
 		{
-			parentActivity.RunOnUiThread (() => {
-				userInput.RequestFocus();
-				InputMethodManager imm = (InputMethodManager)parentActivity.GetSystemService(Context.InputMethodService);
-				imm.ToggleSoftInput(ShowFlags.Forced, 0);
-			});
+			Application.SynchronizationContext.Post(_ =>
+			{
+                userInput.RequestFocus();
+                InputMethodManager imm = (InputMethodManager)parentActivity.GetSystemService(Context.InputMethodService);
+                imm.ToggleSoftInput(ShowFlags.Forced, 0);
+            }, null);
 		}
 
 		private static void HideKeyboard(Activity parentActivity,EditText userInput)
 		{
-			parentActivity.RunOnUiThread (() => {
-				InputMethodManager imm = (InputMethodManager)parentActivity.GetSystemService(Context.InputMethodService);
-				imm.HideSoftInputFromWindow(userInput.WindowToken, 0);
-			});
+			Application.SynchronizationContext.Post(_ =>
+			{
+                InputMethodManager imm = (InputMethodManager)parentActivity.GetSystemService(Context.InputMethodService);
+                imm.HideSoftInputFromWindow(userInput.WindowToken, 0);
+            },null);
 		}
 
 		public static void ResetChannelDrawer(Activity parentActivity, NavigationView navigationView, string[] channels)
 		{
-			parentActivity.RunOnUiThread(() => {
+			Application.SynchronizationContext.Post(_ =>
+			{
                 var subMenu = navigationView.Menu.GetItem(0).SubMenu;
                 subMenu.Clear();
                 for (int i = 0; i < channels.Length; i++)
-			    {
+                {
                     var chanMenuItem = subMenu.Add(Resource.Id.channelsGroup, Menu.None, Menu.None, channels[i]);
                     chanMenuItem.SetIcon(Resource.Drawable.ic_discuss);
-			        chanMenuItem.SetCheckable(true);
-			        chanMenuItem.SetEnabled(true);
-			    }
+                    chanMenuItem.SetCheckable(true);
+                    chanMenuItem.SetEnabled(true);
+                }
                 var createChanMenuItem = subMenu.Add(Resource.Id.channelsGroup, Menu.None, Menu.None, CreateChannelLabel);
                 createChanMenuItem.SetIcon(Resource.Drawable.ic_plus_circle_white_24dp);
                 navigationView.RefreshDrawableState();
-            });
+            }, null);
 		}
 
 	    public static void SelectChannel(Activity parentActivity, NavigationView navigationView, string channel)
 	    {
-            parentActivity.RunOnUiThread(() =>
+            Application.SynchronizationContext.Post(_ =>
             {
                 var subMenu = navigationView.Menu.GetItem(0).SubMenu;
                 for (int i = 0; i < subMenu.Size(); i++)
@@ -106,9 +109,9 @@ namespace AndroidXamarinChat
                         item.SetChecked(false);
                     }
                 }
-                
+
                 navigationView.RefreshDrawableState();
-            });
+            },null);
         }
 
 	    public static void UpdateImageViewSrc(Activity activity, int imageViewRsc, string url)
@@ -116,12 +119,13 @@ namespace AndroidXamarinChat
 
 	        url.GetImageBitmap().ContinueWith(t =>
 	        {
-	            activity.RunOnUiThread(() =>
-	            {
-	                var bitmap = t.Result;
-	                var imageView = activity.FindViewById<ImageView>(imageViewRsc);
-	                imageView.SetImageBitmap(bitmap);
-	            });
+                Application.SynchronizationContext.Post(_ =>
+                {
+                    var bitmap = t.Result;
+                    var imageView = activity.FindViewById<ImageView>(imageViewRsc);
+                    imageView.SetImageBitmap(bitmap);
+
+                }, null);
 	        });
 	    }
 

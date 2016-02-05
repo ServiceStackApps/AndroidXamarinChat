@@ -45,7 +45,7 @@ namespace AndroidXamarinChat
         private Dictionary<string,string> commands = new Dictionary<string, string>
         {
             {"Announce Hello","/cmd.announce Hello from Android"},
-            { "Play YouTube", "/tv.watch http://youtu.be/518XP8prwZo" }
+            { "Play YouTube", "/tv.watch https://youtu.be/u5CVsCnxyXg" }
         }; 
 
 		protected override void OnCreate(Bundle bundle)
@@ -68,10 +68,10 @@ namespace AndroidXamarinChat
             {
                 t.Wait();
                 var bitmap = t.Result;
-                this.RunOnUiThread(() =>
+                Application.SynchronizationContext.Post(_ =>
                 {
                     chatBackground.SetImageBitmap(bitmap);
-                });
+                },null);
             });
 
             navigationView.Tag = 0;
@@ -88,33 +88,52 @@ namespace AndroidXamarinChat
             var channels = prefs.GetString ("Channels", null);
 			var lastChannel = prefs.GetString ("LastChannel", null);
 			cmdReceiver = new ChatCmdReciever (this, messageHistoryAdapter, lastChannel ?? "home");
-			string[] chanArray;
-			if (channels != null) {
-				chanArray = channels.Split (',');
-			} else {
-				chanArray = new[] {"home"};
-			}
+		    var chanArray = channels != null ? channels.Split (',') : new[] {"home"};
 
 			client = new ChatClient(chanArray)
 		    {
-		        OnConnect = connectMsg => { 
-					client.UpdateChatHistory(cmdReceiver).ConfigureAwait(false);
-		            this.RunOnUiThread(() =>
+		        OnConnect = connectMsg =>
+		        {
+		            Task.Run(() =>
 		            {
-		                txtUser.Text = connectMsg.DisplayName;
-		            });
+		                client.UpdateChatHistory(cmdReceiver).ConfigureAwait(false);
+		            }).ConfigureAwait(false);
+					
+		            Application.SynchronizationContext.Post(_ =>
+		            {
+                        txtUser.Text = connectMsg.DisplayName;
+                    },null);
 		            connectMsg.ProfileUrl.GetImageBitmap().ContinueWith(bitmap =>
 		            {
-                        this.RunOnUiThread(() =>
+                        Application.SynchronizationContext.Post(_ =>
                         {
                             imgProfile.SetImageBitmap(bitmap.Result);
-                        });
+                        },null);
 		            });
 		        },
 		        OnException = error => { 
 					errors.Add(error); 
 				}
 		    };
+		    try
+		    {
+                var accountDetailsResponseTask = client.ServiceClient.GetAsync(new GetUserDetails());
+                accountDetailsResponseTask.ConfigureAwait(false);
+                accountDetailsResponseTask.ContinueWith(response =>
+                {
+                    // Do nothing, cookie is still valid.
+                });
+            }
+		    catch (Exception e)
+		    {
+		        if (!(e is WebServiceException)) throw;
+		        var intent = new Intent(this.BaseContext,typeof(LoginActivity));
+		        intent.AddFlags(ActivityFlags.ClearTop | ActivityFlags.NewTask);
+		        StartActivity(intent);
+		        Finish();
+		        throw;
+		    }
+		    
 
 		    SetSupportActionBar(mToolbar);
 
@@ -123,11 +142,11 @@ namespace AndroidXamarinChat
 			mRightDrawer.Adapter = mRightAdapter;
 		    mRightDrawer.ItemClick += (sender, args) =>
 		    {
-                this.RunOnUiThread(() =>
-                {
-                    messageBox.Text = commands[mRightDataSet[args.Position]];
-                    mDrawerLayout.CloseDrawer(mRightDrawer);
-                });
+               Application.SynchronizationContext.Post(_ =>
+               {
+                   messageBox.Text = commands[mRightDataSet[args.Position]];
+                   mDrawerLayout.CloseDrawer(mRightDrawer);
+               },null);
 		    };
 
 			mDrawerToggle = new ChatActionBarDrawerToggle(
@@ -160,11 +179,11 @@ namespace AndroidXamarinChat
 					ta.Wait();
 					try{
 						string nChannel = ta.Result;
-                        List<string> nChannels = new List<string>(client.Channels);
+                        var nChannels = new List<string>(client.Channels);
                         nChannels.Add(nChannel);
                         UiHelpers.ResetChannelDrawer(this,navigationView,nChannels.ToArray());
 						client.ChangeChannel(ta.Result,cmdReceiver);
-                        this.SaveChannelInfo();
+                        SaveChannelInfo();
                     } catch (Exception ex) 
 					{
 						errors.Add(ex);
@@ -173,7 +192,7 @@ namespace AndroidXamarinChat
 			} else {
 				//Change channel
 				client.ChangeChannel(itemText, cmdReceiver);
-                this.SaveChannelInfo();
+                SaveChannelInfo();
             }
             mDrawerLayout.CloseDrawer(navigationView);
 		}
@@ -182,41 +201,62 @@ namespace AndroidXamarinChat
 		{
 		    var hasSelector = messageBox.Text.StartsWith("/");
 		    string selector = hasSelector ? messageBox.Text.Substring(1).SplitOnFirst(" ")[0] : "cmd.chat";
-		    string message = hasSelector ? messageBox.Text.Substring(1).SplitOnFirst(" ")[1] : messageBox.Text;
+		    string message = hasSelector && messageBox.Text.Contains(" ") ? messageBox.Text.Substring(1).SplitOnFirst(" ")[1] : messageBox.Text;
 
 		    if (selector == "cmd.chat")
 		    {
-		        Task.Run(() =>
+                JsonHttpClient httpClient = new JsonHttpClient(ChatClient.BaseUrl);
+		        httpClient.CookieContainer = (client.ServiceClient as ServiceClientBase).CookieContainer;
+		        var dto = new PostChatToChannel
 		        {
-                    client.ServiceClient.Post(new PostChatToChannel
-                    {
-                        Channel = cmdReceiver.CurrentChannel,
-                        From = client.SubscriptionId,
-                        Message = message,
-                        Selector = selector
-                    });
-                });
+		            Channel = cmdReceiver.CurrentChannel,
+		            From = client.SubscriptionId,
+		            Message = message,
+		            Selector = selector
+		        };
+
+		        httpClient.PostAsync(dto).ConfigureAwait(false);
+		    }
+		    else if (selector == "logout")
+		    {
+		        PerformLogout();
 		    }
 		    else
 		    {
-		        Task.Run(() =>
+		        client.ServiceClient.PostAsync(new PostRawToChannel
 		        {
-		            client.ServiceClient.Post(new PostRawToChannel
-		            {
-		                Channel = cmdReceiver.CurrentChannel,
-		                From = client.SubscriptionId,
-		                Message = message,
-		                Selector = selector
-		            });
-		        });
+		            Channel = cmdReceiver.CurrentChannel,
+		            From = client.SubscriptionId,
+		            Message = message,
+		            Selector = selector
+		        }).ConfigureAwait(false);
 		    }
 
-		    RunOnUiThread(() => {
-		        messageBox.Text = "";
-		    });
+		    Application.SynchronizationContext.Post(_ =>
+		    {
+                messageBox.Text = "";
+            }, null);
 		}
 
-		public override bool OnOptionsItemSelected (IMenuItem item)
+	    private void PerformLogout()
+	    {
+	        var txtUser = this.FindViewById<TextView>(Resource.Id.txtUserName);
+	        AccountStore.Create(this).Delete(new Account(txtUser.Text), "Twitter");
+	        client.ServiceClient.ClearCookies();
+	        var intent = new Intent(this.BaseContext, typeof (LoginActivity));
+	        intent.AddFlags(ActivityFlags.ClearTop | ActivityFlags.NewTask);
+
+	        StartActivity(intent);
+	        Finish();
+	    }
+
+	    public override void Finish()
+	    {
+	        base.Finish();
+	        cmdReceiver = null;
+	    }
+
+	    public override bool OnOptionsItemSelected (IMenuItem item)
 		{
 		    switch (item.ItemId)
 		    {
@@ -255,7 +295,7 @@ namespace AndroidXamarinChat
 
 		protected override void OnSaveInstanceState (Bundle outState)
 		{
-		    this.SaveChannelInfo();
+		    SaveChannelInfo();
             base.OnSaveInstanceState (outState);
 		}
 
@@ -271,31 +311,28 @@ namespace AndroidXamarinChat
 	    protected override void OnPostCreate (Bundle savedInstanceState)
 		{
 			base.OnPostCreate (savedInstanceState);
-	        UpdateCookiesFromIntent();
 
-            //TODO Check if cookie still valid, if not throw back to login activity.
+	        UpdateCookiesFromIntent(this, client);
 
-			mDrawerToggle.SyncState();
+            mDrawerToggle.SyncState();
             UiHelpers.ResetChannelDrawer (this, navigationView, client.Channels);
 			client.Resolver = new MessageResolver (cmdReceiver);
-			client.Connect ().ConfigureAwait (false);
-        }
+	        client.Connect().ConfigureAwait(false);
+		}
 
-	    private void UpdateCookiesFromIntent()
+	    private static void UpdateCookiesFromIntent(MainActivity mainActivity, ServerEventsClient client)
 	    {
-	        if (this.Intent != null)
+	        if (mainActivity.Intent == null)
+                return;
+	        string cookieStr = mainActivity.Intent.GetStringExtra("SSCookie");
+	        if (string.IsNullOrEmpty(cookieStr) || !cookieStr.Contains(';'))
+                return;
+	        var cookies = cookieStr.Split(';');
+	        foreach (var c in cookies)
 	        {
-	            string cookieStr = this.Intent.GetStringExtra("SSCookie");
-	            if (cookieStr != null)
-	            {
-	                var cookies = cookieStr.Split(';');
-	                foreach (var c in cookies)
-	                {
-	                    var key = c.Split('=')[0].Trim();
-	                    var val = c.Split('=')[1].Trim();
-	                    client.ServiceClient.SetCookie(key, val);
-	                }
-	            }
+	            var key = c.Split('=')[0].Trim();
+	            var val = c.Split('=')[1].Trim();
+	            client.ServiceClient.SetCookie(key, val);
 	        }
 	    }
 

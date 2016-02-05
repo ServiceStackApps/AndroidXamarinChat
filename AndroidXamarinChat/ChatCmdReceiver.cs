@@ -34,24 +34,27 @@ namespace AndroidXamarinChat
 			}
 			FullHistory [chatMessage.Channel].Add (chatMessage.DisplayMessage ());
 			if (chatMessage.Channel == this.CurrentChannel) {
-				parentActivity.RunOnUiThread (() => {
-					messageAdapter.Add (chatMessage.DisplayMessage ());
-					messageAdapter.NotifyDataSetChanged ();
-				});
+				Application.SynchronizationContext.Post(_ =>
+				{
+                    messageAdapter.Add(chatMessage.DisplayMessage());
+                    messageAdapter.NotifyDataSetChanged();
+                },null);
 			}
 		}
 
 		public void ChangeChannel(string channel)
 		{
 			this.CurrentChannel = channel;
-			parentActivity.RunOnUiThread (() => {
-				messageAdapter.Clear ();
-				if (FullHistory.ContainsKey (channel)) {
-					FullHistory [channel].ForEach (msg => {
-						messageAdapter.Add (msg);
-					});
-				}
-			});
+			Application.SynchronizationContext.Post(_ =>
+			{
+                messageAdapter.Clear();
+                if (FullHistory.ContainsKey(channel))
+                {
+                    FullHistory[channel].ForEach(msg => {
+                        messageAdapter.Add(msg);
+                    });
+                }
+            },null);
 		}
 
 		public void SyncAdapter()
@@ -95,10 +98,10 @@ namespace AndroidXamarinChat
              {
                  var bitmap = t.Result;
                  var chatBackground = parentActivity.FindViewById<ImageView>(Resource.Id.chat_background);
-                 parentActivity.RunOnUiThread(() =>
+                 Application.SynchronizationContext.Post(_ =>
                  {
                      chatBackground.SetImageBitmap(bitmap);
-                 });
+                 },null);
              });
         }
 	}

@@ -1,8 +1,8 @@
 /* Options:
-Date: 2016-02-04 18:10:54
+Date: 2016-02-04 22:01:48
 Version: 4.00
 Tip: To override a DTO option, remove "//" prefix before updating
-BaseUrl: http://localhost:1337
+BaseUrl: http://chat.servicestack.net
 
 //GlobalNamespace: 
 //MakePartial: True
