@@ -28,8 +28,7 @@
                 android:layout_gravity="top"
                 android:scaleType="centerCrop"
                 android:adjustViewBounds="true"
-                android:id="@+id/chat_background"
-                android:src="@drawable/nav_logo" />
+                android:id="@+id/chat_background" />
             <LinearLayout
                 android:orientation="horizontal"
                 android:layout_width="match_parent"

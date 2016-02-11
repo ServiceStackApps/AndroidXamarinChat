@@ -25,7 +25,7 @@ namespace AndroidXamarinChat
             authUrl = new Uri(serviceStackBaseUrl + "/auth/" + provider);
             if (getUserDetails == null)
             {
-                throw new ArgumentNullException(nameof(getUserDetails));
+                throw new ArgumentNullException("getUserDetails");
             }
             this.serviceStackBaseUrl = serviceStackBaseUrl;
             getCustomUserDetails = getUserDetails;
@@ -105,5 +105,4 @@ namespace AndroidXamarinChat
         public string UserAuthName { get; set; }
         public string UserName { get; set; }
     }
-
 }

@@ -5,18 +5,13 @@ using ServiceStack;
 using Chat;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using SupportToolbar = Android.Support.V7.Widget.Toolbar;
 using Android.Support.V7.App;
 using Android.Support.V4.Widget;
 using Android.Views;
-using System.Threading.Tasks;
 using Android.Content.PM;
-using Android.Preferences;
 using Android.Content;
-using Android.Graphics;
 using Android.Support.Design.Widget;
-using Java.Util.Logging;
 using ServiceStack.Logging;
 using Xamarin.Auth;
 using LogManager = ServiceStack.Logging.LogManager;
@@ -27,28 +22,26 @@ namespace AndroidXamarinChat
 		Theme="@style/ChatApp", ScreenOrientation = ScreenOrientation.Portrait)]
 	public class MainActivity : AppCompatActivity
 	{
-		private ChatActionBarDrawerToggle mDrawerToggle;
+        public const string BaseUrl = "http://chat.servicestack.net/";
+        private ChatActionBarDrawerToggle mDrawerToggle;
 		private DrawerLayout mDrawerLayout;
 		private ListView mRightDrawer;
 	    private NavigationView navigationView;
 
-		private ListView messageHistoryList;
-
-		private ArrayAdapter mRightAdapter;
-		private ArrayAdapter messageHistoryAdapter;
-		private List<string> mRightDataSet;
 		private EditText messageBox;
 
-		private List<string> messageHistoryDataSet;
 	    private readonly List<Exception> errors = new List<Exception> ();
 
-	    private ChatClient client;
-		private ChatCmdReciever cmdReceiver;
+	    private ServerEventsClient client;
+		private ChatCommandHandler cmdReceiver;
 
-        private Dictionary<string,string> commands = new Dictionary<string, string>
+        private List<ServerEventCommand> subscriberList = new List<ServerEventCommand>(); 
+
+        private readonly Dictionary<string,string> commands = new Dictionary<string, string>
         {
             {"Announce Hello","/cmd.announce Hello from Android"},
-            { "Play YouTube", "/tv.watch https://youtu.be/u5CVsCnxyXg" }
+            { "Play YouTube", "/tv.watch https://youtu.be/u5CVsCnxyXg" },
+            {"Logout","/logout" }
         }; 
 
 		protected override void OnCreate(Bundle bundle)
@@ -67,78 +60,58 @@ namespace AndroidXamarinChat
 			mDrawerLayout = FindViewById<DrawerLayout>(Resource.Id.drawer_layout);
 			navigationView = FindViewById<NavigationView>(Resource.Id.nav_view);
 			mRightDrawer = FindViewById<ListView>(Resource.Id.right_drawer);
-			messageHistoryList = FindViewById<ListView>(Resource.Id.messageHistory);
+			var messageHistoryList = FindViewById<ListView>(Resource.Id.messageHistory);
             var chatBackground = FindViewById<ImageView>(Resource.Id.chat_background);
-            "https://servicestack.net/img/slide/image01.jpg".GetImageBitmap().ContinueWith(t =>
-            {
-                t.Wait();
-                var bitmap = t.Result;
-                Application.SynchronizationContext.Post(_ =>
-                {
-                    chatBackground.SetImageBitmap(bitmap);
-                },null);
-            });
+            InitDefaultBackground(chatBackground);
 
             navigationView.Tag = 0;
 			mRightDrawer.Tag = 1;
 
-			messageHistoryDataSet = new List<string> ();
-			messageHistoryAdapter = new ArrayAdapter (this, Android.Resource.Layout.SimpleListItem1, messageHistoryDataSet);
+			var messageHistoryAdapter = new MessageListViewAdapter(this, new List<ChatMessage>(), () => this.subscriberList);
 			messageHistoryList.Adapter = messageHistoryAdapter;
 
 		    var txtUser = FindViewById<TextView>(Resource.Id.txtUserName);
 		    var imgProfile = FindViewById<ImageView>(Resource.Id.imgProfile);
 		    var channels = new[] {"home"};
-			cmdReceiver = new ChatCmdReciever (this, messageHistoryAdapter, "home");
+			cmdReceiver = new ChatCommandHandler (this, messageHistoryAdapter, "home");
 
-			client = new ChatClient(channels)
+		    client = new ServerEventsClient(BaseUrl, channels)
 		    {
 		        OnConnect = connectMsg =>
 		        {
-		            Task.Run(() =>
-		            {
-		                client.UpdateChatHistory(cmdReceiver).ConfigureAwait(false);
-		            }).ConfigureAwait(false);
-					
-		            Application.SynchronizationContext.Post(_ =>
-		            {
-                        txtUser.Text = connectMsg.DisplayName;
-                    },null);
-		            connectMsg.ProfileUrl.GetImageBitmap().ContinueWith(bitmap =>
-		            {
-                        Application.SynchronizationContext.Post(_ =>
-                        {
-                            imgProfile.SetImageBitmap(bitmap.Result);
-                        },null);
-		            });
+		            client.UpdateChatHistory(cmdReceiver).ConfigureAwait(false);
+		            connectMsg.UpdateUserProfile(txtUser, imgProfile);
 		        },
-		        OnException = error => { 
-					errors.Add(error); 
-				}
-		    };
-		    try
-		    {
-                var accountDetailsResponseTask = client.ServiceClient.GetAsync(new GetUserDetails());
-                accountDetailsResponseTask.ConfigureAwait(false);
-                accountDetailsResponseTask.ContinueWith(response =>
+                OnCommand = command =>
                 {
-                    // Do nothing, cookie is still valid.
-                });
-            }
-		    catch (Exception e)
-		    {
-		        if (!(e is WebServiceException)) throw;
-		        var intent = new Intent(this.BaseContext,typeof(LoginActivity));
-		        intent.AddFlags(ActivityFlags.ClearTop | ActivityFlags.NewTask);
-		        StartActivity(intent);
-		        Finish();
-		        throw;
-		    }
-		    
-		    SetSupportActionBar(mToolbar);
+                    if (command is ServerEventJoin)
+                    {
+                        client.ServiceClient.GetAsync<List<ServerEventCommand>>(
+                            "/event-subscribers?{0}".Fmt(client.Channels.Join(",")))
+                            .ContinueWith(task =>
+                            {
+                                task.Wait();
+                                subscriberList = new List<ServerEventCommand>(task.Result);
+                            }).ConfigureAwait(false);
+                    }  
+                },
+		        OnException =
+		            error =>
+		            {
+		                Application.SynchronizationContext.Post(
+		                    _ => { Toast.MakeText(this, "Error : " + error.Message, ToastLength.Long); }, null);
+		            },
+		        //ServiceClient = new JsonHttpClient(BaseUrl),
+		        Resolver = new MessageResolver(cmdReceiver)
+		    };
+		    client.RegisterNamedReceiver<ChatReceiver>("cmd");
+            client.RegisterNamedReceiver<TvReciever>("tv");
+            client.RegisterNamedReceiver<CssReceiver>("css");
+            
+            SetSupportActionBar(mToolbar);
 
-		    mRightDataSet = new List<string>(commands.Keys);
-		    mRightAdapter = new ArrayAdapter<string>(this, Android.Resource.Layout.SimpleListItem1, mRightDataSet);
+		    var mRightDataSet = new List<string>(commands.Keys);
+		    var mRightAdapter = new ActionListViewAdapter(this, mRightDataSet);
 			mRightDrawer.Adapter = mRightAdapter;
 		    mRightDrawer.ItemClick += (sender, args) =>
 		    {
@@ -163,18 +136,25 @@ namespace AndroidXamarinChat
 			mDrawerLayout.SetDrawerListener(mDrawerToggle);
 			mDrawerToggle.SyncState();
 
-		    navigationView.NavigationItemSelected += this.OnChannelClick;
+		    navigationView.NavigationItemSelected += OnChannelClick;
             sendButton.Click += OnSendClick;
 		}
 
+	    private static void InitDefaultBackground(ImageView chatBackground)
+	    {
+	        "https://servicestack.net/img/slide/image01.jpg".GetImageBitmap().ContinueWith(t =>
+	        {
+	            t.Wait();
+	            var bitmap = t.Result;
+	            Application.SynchronizationContext.Post(_ => { chatBackground.SetImageBitmap(bitmap); }, null);
+	        });
+	    }
 
-		public void OnChannelClick(object sender, NavigationView.NavigationItemSelectedEventArgs navigationItemSelectedEventArgs)
+	    public void OnChannelClick(object sender, NavigationView.NavigationItemSelectedEventArgs navigationItemSelectedEventArgs)
 		{
 		    string itemText = navigationItemSelectedEventArgs.MenuItem.TitleFormatted.ToString();
 			if(itemText == UiHelpers.CreateChannelLabel) {
 				var result = UiHelpers.ShowChannelDialog(this);
-				messageHistoryAdapter.Clear();
-				messageHistoryAdapter.NotifyDataSetChanged();
 				result.ContinueWith(ta => {
 					ta.Wait();
 					try{
@@ -183,6 +163,7 @@ namespace AndroidXamarinChat
                         nChannels.Add(nChannel);
                         UiHelpers.ResetChannelDrawer(this,navigationView,nChannels.ToArray());
 						client.ChangeChannel(ta.Result,cmdReceiver);
+                        cmdReceiver.SyncAdapter();
                     } catch (Exception ex) 
 					{
 						errors.Add(ex);
@@ -226,41 +207,25 @@ namespace AndroidXamarinChat
 		        }).ConfigureAwait(false);
 		    }
 
-		    Application.SynchronizationContext.Post(_ =>
-		    {
-                messageBox.Text = "";
-            }, null);
-		}
+            messageBox.Text = "";
+        }
 
 	    private void PerformLogout()
 	    {
-	        var txtUser = this.FindViewById<TextView>(Resource.Id.txtUserName);
+	        var txtUser = FindViewById<TextView>(Resource.Id.txtUserName);
 	        AccountStore.Create(this).Delete(new Account(txtUser.Text), "Twitter");
 	        client.ServiceClient.ClearCookies();
-	        var intent = new Intent(this.BaseContext, typeof (LoginActivity));
+	        var intent = new Intent(BaseContext, typeof (LoginActivity));
 	        intent.AddFlags(ActivityFlags.ClearTop | ActivityFlags.NewTask);
 
 	        StartActivity(intent);
 	        Finish();
 	    }
 
-	    public override void Finish()
-	    {
-	        base.Finish();
-	        cmdReceiver = null;
-	    }
-
 	    public override bool OnOptionsItemSelected (IMenuItem item)
 		{
 		    switch (item.ItemId)
 		    {
-		        case Android.Resource.Id.Home:
-		            //The hamburger icon was clicked which means the drawer toggle will handle the event
-		            //all we need to do is ensure the right drawer is closed so the don't overlap
-		            mDrawerLayout.CloseDrawer(mRightDrawer);
-		            mDrawerToggle.OnOptionsItemSelected(item);
-		            return true;
-
 		        case Resource.Id.action_help:
 		            if (mDrawerLayout.IsDrawerOpen(mRightDrawer))
 		            {
@@ -273,9 +238,7 @@ namespace AndroidXamarinChat
 		                mDrawerLayout.OpenDrawer(mRightDrawer);
 		                mDrawerLayout.CloseDrawer(navigationView);
 		            }
-
 		            return true;
-
 		        default:
 		            return base.OnOptionsItemSelected(item);
 		    }
@@ -291,29 +254,12 @@ namespace AndroidXamarinChat
 		{
 			base.OnPostCreate (savedInstanceState);
 
-	        UpdateCookiesFromIntent(this, client);
+	        this.UpdateCookiesFromIntent(client);
 
             mDrawerToggle.SyncState();
             UiHelpers.ResetChannelDrawer (this, navigationView, client.Channels);
-			client.Resolver = new MessageResolver (cmdReceiver);
 	        client.Connect().ConfigureAwait(false);
 		}
-
-	    private static void UpdateCookiesFromIntent(MainActivity mainActivity, ServerEventsClient client)
-	    {
-	        if (mainActivity.Intent == null)
-                return;
-	        string cookieStr = mainActivity.Intent.GetStringExtra("SSCookie");
-	        if (string.IsNullOrEmpty(cookieStr) || !cookieStr.Contains(';'))
-                return;
-	        var cookies = cookieStr.Split(';');
-	        foreach (var c in cookies)
-	        {
-	            var key = c.Split('=')[0].Trim();
-	            var val = c.Split('=')[1].Trim();
-	            client.ServiceClient.SetCookie(key, val);
-	        }
-	    }
 
 	    public override void OnConfigurationChanged (Android.Content.Res.Configuration newConfig)
 		{
@@ -324,7 +270,8 @@ namespace AndroidXamarinChat
 	    protected override void OnDestroy()
 	    {
 	        client.Stop();
-	        base.OnDestroy();
+            cmdReceiver = null;
+            base.OnDestroy();
 	    }
 	}
 }

@@ -1,16 +1,11 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-
 using Android.App;
 using Android.Content;
 using Android.Content.PM;
 using Android.OS;
 using Android.Preferences;
-using Android.Runtime;
 using Android.Support.V7.App;
-using Android.Views;
 using Android.Widget;
 using Chat;
 using ServiceStack;
@@ -38,7 +33,7 @@ namespace AndroidXamarinChat
 
             var btnTwitter = FindViewById<ImageButton>(Resource.Id.btnTwitter);
             var btnAnon = FindViewById<ImageButton>(Resource.Id.btnAnon);
-            var client = new JsonServiceClient(ChatClient.BaseUrl);
+            var client = new JsonServiceClient(MainActivity.BaseUrl);
             
             btnTwitter.Click += (sender, args) =>
             {
@@ -76,7 +71,7 @@ namespace AndroidXamarinChat
         private void PerformServiceStackAuth(JsonServiceClient client)
         {
             var ssAuth = new ServiceStackAuthenticator(
-                ChatClient.BaseUrl,
+                MainActivity.BaseUrl,
                 "twitter", jsonServiceClient =>
                 {
                     var userDetails = jsonServiceClient.Get(new GetUserDetails());
@@ -101,7 +96,7 @@ namespace AndroidXamarinChat
         {
             client.CookieContainer = existingAccount.Cookies;
             var intent = new Intent(this, typeof (MainActivity));
-            intent.PutExtra("SSCookie", client.CookieContainer.GetCookieHeader(new Uri(ChatClient.BaseUrl)));
+            intent.PutExtra("SSCookie", client.CookieContainer.GetCookieHeader(new Uri(MainActivity.BaseUrl)));
             StartActivity(intent);
         }
 

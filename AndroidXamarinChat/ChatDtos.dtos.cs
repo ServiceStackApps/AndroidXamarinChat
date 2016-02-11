@@ -1,5 +1,5 @@
 /* Options:
-Date: 2016-02-04 22:01:48
+Date: 2016-02-10 23:20:43
 Version: 4.00
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://chat.servicestack.net

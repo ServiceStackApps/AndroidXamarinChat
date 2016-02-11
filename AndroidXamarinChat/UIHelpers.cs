@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using Android.Support.V7.App;
 using Android.Widget;
 using Android.App;
-using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -25,9 +23,8 @@ namespace AndroidXamarinChat
 		{
 			var tcs = new TaskCompletionSource<string>();
 			var inputDialog = new Android.Support.V7.App.AlertDialog.Builder(activity);
-			var userInput = new EditText (inputDialog.Context);
-			userInput.Hint = "New Channel";
-			string selectedInput = "Create new channel";
+		    var userInput = new EditText(inputDialog.Context) {Hint = "New Channel"};
+		    string selectedInput = "Create new channel";
 			userInput.Text = "general";
 			//SetEditTextStylings(userInput);
 			userInput.InputType = Android.Text.InputTypes.ClassText;
@@ -35,40 +32,22 @@ namespace AndroidXamarinChat
 			inputDialog.SetView(userInput);
 			inputDialog.SetPositiveButton(
 				"Ok",
-				(see, ess) => 
+				(see, ess) =>
 				{
-					if (userInput.Text != string.Empty)
-					{
-						tcs.SetResult(userInput.Text);
-					}
-					else
-					{
-						tcs.SetResult("");
-					}
-					//HideKeyboard(userInput);
+				    tcs.SetResult(userInput.Text != string.Empty ? userInput.Text : "");
+				    //HideKeyboard(userInput);
+				    HideKeyboard(activity, userInput);
 				});
-			inputDialog.SetNegativeButton("Cancel", (afk, kfa) => { 
-				//HideKeyboard(userInput); 
-			});
+			inputDialog.SetNegativeButton("Cancel", (afk, kfa) => HideKeyboard(activity, userInput));
 			inputDialog.Show();
 			return tcs.Task;
 		}
 
-		private static void ShowKeyboard(Activity parentActivity, EditText userInput)
+		private static void HideKeyboard(Context parentActivity,View userInput)
 		{
 			Application.SynchronizationContext.Post(_ =>
 			{
-                userInput.RequestFocus();
-                InputMethodManager imm = (InputMethodManager)parentActivity.GetSystemService(Context.InputMethodService);
-                imm.ToggleSoftInput(ShowFlags.Forced, 0);
-            }, null);
-		}
-
-		private static void HideKeyboard(Activity parentActivity,EditText userInput)
-		{
-			Application.SynchronizationContext.Post(_ =>
-			{
-                InputMethodManager imm = (InputMethodManager)parentActivity.GetSystemService(Context.InputMethodService);
+                var imm = (InputMethodManager)parentActivity.GetSystemService(Context.InputMethodService);
                 imm.HideSoftInputFromWindow(userInput.WindowToken, 0);
             },null);
 		}
@@ -79,9 +58,9 @@ namespace AndroidXamarinChat
 			{
                 var subMenu = navigationView.Menu.GetItem(0).SubMenu;
                 subMenu.Clear();
-                for (int i = 0; i < channels.Length; i++)
+                foreach (string channel in channels)
                 {
-                    var chanMenuItem = subMenu.Add(Resource.Id.channelsGroup, Menu.None, Menu.None, channels[i]);
+                    var chanMenuItem = subMenu.Add(Resource.Id.channelsGroup, Menu.None, Menu.None, channel);
                     chanMenuItem.SetIcon(Resource.Drawable.ic_discuss);
                     chanMenuItem.SetCheckable(true);
                     chanMenuItem.SetEnabled(true);

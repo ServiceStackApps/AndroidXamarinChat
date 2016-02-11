@@ -11,32 +11,32 @@ using Android.OS;
 
 namespace AndroidXamarinChat
 {
-	public class ChatCmdReciever
+	public class ChatCommandHandler
 	{
 		private Activity parentActivity;
-		private ArrayAdapter messageAdapter;
-		public Dictionary<string,List<string>> FullHistory { get; set; }
+		private MessageListViewAdapter messageAdapter;
+		public Dictionary<string,List<ChatMessage>> FullHistory { get; set; }
 
 		public string CurrentChannel  { get; set; }
 
-		public ChatCmdReciever(Activity parentActivity, ArrayAdapter messageAdapter, string initialChannel)
+		public ChatCommandHandler(Activity parentActivity, MessageListViewAdapter messageAdapter, string initialChannel)
 		{
 			this.parentActivity = parentActivity;
 			this.messageAdapter = messageAdapter;
-			this.FullHistory = new Dictionary<string, List<string>> ();
+			this.FullHistory = new Dictionary<string, List<ChatMessage>> ();
 			this.CurrentChannel = initialChannel;
 		}
 
 		public void AppendMessage(ChatMessage chatMessage)
 		{
 			if (!FullHistory.ContainsKey (chatMessage.Channel)) {
-				FullHistory.Add (chatMessage.Channel, new List<string> ());
+				FullHistory.Add (chatMessage.Channel, new List<ChatMessage> ());
 			}
-			FullHistory [chatMessage.Channel].Add (chatMessage.DisplayMessage ());
+			FullHistory [chatMessage.Channel].Add (chatMessage);
 			if (chatMessage.Channel == this.CurrentChannel) {
 				Application.SynchronizationContext.Post(_ =>
 				{
-                    messageAdapter.Add(chatMessage.DisplayMessage());
+                    messageAdapter.Add(chatMessage);
                     messageAdapter.NotifyDataSetChanged();
                 },null);
 			}
@@ -85,11 +85,14 @@ namespace AndroidXamarinChat
 
             // Publish the notification:
             const int notificationId = 0;
-            notificationManager.Notify(notificationId, notification);
+		    if (notificationManager != null)
+		    {
+		        notificationManager.Notify(notificationId, notification);
 
-            Vibrator vibrator = (Vibrator)parentActivity.GetSystemService(Context.VibratorService);
-            vibrator.Vibrate(1000);
-		    CancelNotification(notificationManager).ConfigureAwait(false);
+		        Vibrator vibrator = (Vibrator)parentActivity.GetSystemService(Context.VibratorService);
+		        vibrator.Vibrate(1000);
+		        CancelNotification(notificationManager).ConfigureAwait(false);
+		    }
 		}
 
 	    private async Task CancelNotification(NotificationManager notificationManager)
@@ -115,8 +118,8 @@ namespace AndroidXamarinChat
 
 	public class MessageResolver : IResolver
 	{
-		ChatCmdReciever messageHandler;
-		public MessageResolver(ChatCmdReciever messageHandler)
+		ChatCommandHandler messageHandler;
+		public MessageResolver(ChatCommandHandler messageHandler)
 		{
 			this.messageHandler = messageHandler;
 		}
