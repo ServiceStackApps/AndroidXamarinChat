@@ -302,4 +302,7 @@
   <ItemGroup>
     <AndroidResource Include="Resources\drawable-xxxhdpi\ic_build_black_24dp.png" />
   </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable\circular.xml" />
+  </ItemGroup>
 </Project>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Android.Widget;
 using Android.App;
@@ -108,7 +109,7 @@ namespace AndroidXamarinChat
 	        });
 	    }
 
-        private static readonly Dictionary<string,byte[]> BackgroundCache = new Dictionary<string, byte[]>(); 
+        private static readonly ConcurrentDictionary<string,byte[]> BackgroundCache = new ConcurrentDictionary<string, byte[]>(); 
 
 	    public static Task<Bitmap> GetImageBitmap(this string url)
 	    {
@@ -122,7 +123,7 @@ namespace AndroidXamarinChat
                 else
                 {
                     bytes = url.GetBytesFromUrl();
-                    BackgroundCache.Add(url, bytes);
+                    BackgroundCache.TryAdd(url, bytes);
                 }
                 var bitmap = BitmapFactory.DecodeByteArray(bytes, 0, bytes.Length);
                 return bitmap;

@@ -1,11 +1,15 @@
 using System;
 using System.Linq;
+using Android.Animation;
 using Android.App;
 using Android.Content;
 using Android.Content.PM;
 using Android.OS;
 using Android.Preferences;
+using Android.Support.V4.View.Animation;
 using Android.Support.V7.App;
+using Android.Views;
+using Android.Views.Animations;
 using Android.Widget;
 using Chat;
 using ServiceStack;
@@ -18,6 +22,9 @@ namespace AndroidXamarinChat
         Theme = "@style/ChatApp", ScreenOrientation = ScreenOrientation.Portrait)]
     public class LoginActivity : AppCompatActivity
     {
+        private ProgressBar progressBar;
+        private ObjectAnimator animation;
+
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
@@ -31,12 +38,21 @@ namespace AndroidXamarinChat
             SupportActionBar.SetHomeButtonEnabled(true);
             SupportActionBar.SetDisplayShowTitleEnabled(true);
 
+            progressBar = FindViewById<ProgressBar>(Resource.Id.progressBar);
+
+            animation = ObjectAnimator.OfInt(progressBar, "progress", 0, 500); // see this max value coming back here, we animale towards that value
+            animation.RepeatMode = ValueAnimatorRepeatMode.Reverse;
+            animation.RepeatCount = 100;
+            animation.SetDuration(1500);
+            animation.SetInterpolator(new FastOutLinearInInterpolator());
+
             var btnTwitter = FindViewById<ImageButton>(Resource.Id.btnTwitter);
             var btnAnon = FindViewById<ImageButton>(Resource.Id.btnAnon);
             var client = new JsonServiceClient(MainActivity.BaseUrl);
             
             btnTwitter.Click += (sender, args) =>
             {
+                StartProgressBar();
                 Account existingAccount;
                 // If cookies saved from twitter login, automatically continue to chat activity.
                 if (TryResolveAccount(out existingAccount))
@@ -48,24 +64,62 @@ namespace AndroidXamarinChat
                         task.ConfigureAwait(false);
                         task.ContinueWith(res =>
                         {
-                            StartAuthChatActivity(client,existingAccount);
+                            if (res.Exception != null)
+                            {
+                                // Failed with current cookie 
+                                client.ClearCookies();
+                                PerformServiceStackAuth(client);
+                                StopProgressBar();
+                            }
+                            else
+                            {
+                                StartAuthChatActivity(client, existingAccount);
+                                StopProgressBar();
+                            }
+                            
                         });
                     }
                     catch (Exception)
                     {
                         // Failed with current cookie 
                         client.ClearCookies();
+                        StopProgressBar();
                         PerformServiceStackAuth(client);
                     }
                 }
                 else
+                {
+                    StopProgressBar();
                     PerformServiceStackAuth(client);
+                }
+                    
             };
 
             btnAnon.Click += (sender, args) =>
             {
+                StartProgressBar();
                 StartGuestChatActivity(client);
+                StopProgressBar();
             };
+        }
+
+        private void StartProgressBar()
+        {
+            Application.SynchronizationContext.Post(_ =>
+            {
+                progressBar.Visibility = ViewStates.Visible;
+                animation.Start();
+            }, null);
+            
+        }
+
+        private void StopProgressBar()
+        {
+            Application.SynchronizationContext.Post(_ =>
+            {
+                progressBar.ClearAnimation();
+                progressBar.Visibility = ViewStates.Invisible;
+            }, null);
         }
 
         private void PerformServiceStackAuth(JsonServiceClient client)

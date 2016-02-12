@@ -35,7 +35,7 @@ namespace AndroidXamarinChat
             var label = row.FindViewById<TextView>(Resource.Id.txtMessage);
 	        var message = items[position];
 	        string profileUrl = null;
-	        var subs = subscribers();
+	        var subs = new List<ServerEventCommand>(subscribers());
             foreach (var subscriber in subs)
 	        {
 	            if (message.FromUserId == subscriber.UserId)
