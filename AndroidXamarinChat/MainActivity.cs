@@ -86,13 +86,15 @@ namespace AndroidXamarinChat
                 {
                     if (command is ServerEventJoin)
                     {
-                        client.ServiceClient.GetAsync<List<ServerEventCommand>>(
-                            "/event-subscribers?{0}".Fmt(client.Channels.Join(",")))
-                            .ContinueWith(task =>
+						client.GetSubscribers().ContinueWith(result => {
+							result.Wait();
+                            subscriberList = result.Result;
+                            Application.SynchronizationContext.Post(_ =>
                             {
-                                task.Wait();
-                                subscriberList = new List<ServerEventCommand>(task.Result);
-                            }).ConfigureAwait(false);
+                                // Refresh profile icons when users join
+                                messageHistoryAdapter.NotifyDataSetChanged();
+                            }, null);
+						});
                     }  
                 },
 		        OnException =

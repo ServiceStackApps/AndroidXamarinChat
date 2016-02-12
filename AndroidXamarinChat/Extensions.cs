@@ -95,5 +95,13 @@ namespace AndroidXamarinChat
                 client.ServiceClient.SetCookie(key, val);
             }
         }
+
+		public static Task<List<ServerEventCommand>> GetSubscribers(this ServerEventsClient client)
+		{
+			var task = client.ServiceClient.GetAsync<List<ServerEventCommand>>(
+				"/event-subscribers?{0}".Fmt(client.Channels.Join(",")));
+				task.ConfigureAwait(false);
+			return task;
+		}
     }
 }
