@@ -7,6 +7,7 @@ using ServiceStack.Configuration;
 using Android.Content;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Android.Graphics;
 using Android.OS;
 
 namespace AndroidXamarinChat
@@ -114,6 +115,21 @@ namespace AndroidXamarinChat
                  },null);
              });
         }
+
+	    public void ChangeBackgroundColor(string message)
+	    {
+            // Inject alpha values
+	        string color = message.Replace("#", "#AA");
+	        var chatLayout = parentActivity.FindViewById<ListView>(Resource.Id.messageHistory);
+	        var editText = parentActivity.FindViewById<EditText>(Resource.Id.message);
+	        var sendButton = parentActivity.FindViewById<Button>(Resource.Id.sendMessageButton);
+            Application.SynchronizationContext.Post(_ =>
+            {
+                chatLayout.SetBackgroundColor(Color.ParseColor(color));
+                editText.SetBackgroundColor(Color.ParseColor(color));
+                sendButton.SetBackgroundColor(Color.ParseColor(color));
+            }, null);
+	    }
 	}
 
 	public class MessageResolver : IResolver

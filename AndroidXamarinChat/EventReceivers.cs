@@ -62,5 +62,10 @@ namespace AndroidXamarinChat
         {
             chatMessageHandler.ChangeBackground(message);
         }
+
+        public void Background(string message)
+        {
+            chatMessageHandler.ChangeBackgroundColor(message);
+        }
     }
 }

@@ -36,7 +36,7 @@
                 android:focusableInTouchMode="true"
                 android:layout_height="40dp"
                 android:background="@drawable/chat_background_blend"
-                android:id="@+id/linearLayout2"
+                android:id="@+id/chatBodyLayout"
                 android:layout_gravity="bottom"
                 android:layout_alignParentBottom="true">
                 <EditText
