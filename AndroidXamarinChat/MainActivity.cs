@@ -42,7 +42,7 @@ namespace AndroidXamarinChat
             {"Announce Hello","/cmd.announce Hello from Android"},
             { "Play YouTube", "/tv.watch https://youtu.be/u5CVsCnxyXg" },
             { "Set background color", "/css.background$#top #0091ea"},
-            { "Reset background color", "/css.background$top #ffffff"},
+            { "Reset background color", "/css.background$#top #ffffff"},
             {"Logout","/logout" }
         }; 
 

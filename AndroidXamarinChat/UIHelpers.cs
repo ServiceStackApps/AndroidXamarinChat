@@ -24,8 +24,8 @@ namespace AndroidXamarinChat
 		{
 			var tcs = new TaskCompletionSource<string>();
 			var inputDialog = new Android.Support.V7.App.AlertDialog.Builder(activity);
-		    var userInput = new EditText(inputDialog.Context) {Hint = "New Channel"};
-		    string selectedInput = "Create new channel";
+		    var userInput = new EditText(inputDialog.Context) {Hint = "Join Channel"};
+		    string selectedInput = "Join Channel";
 			userInput.Text = "general";
 			//SetEditTextStylings(userInput);
 			userInput.InputType = Android.Text.InputTypes.ClassText;
