@@ -35,7 +35,7 @@ namespace AndroidXamarinChat
         private ServerEventsClient client;
         private ChatCommandHandler cmdReceiver;
 
-        private List<ServerEventCommand> subscriberList = new List<ServerEventCommand>();
+        private List<ServerEventUser> subscriberList = new List<ServerEventUser>();
 
         private readonly Dictionary<string, string> commands = new Dictionary<string, string>
         {
@@ -87,7 +87,7 @@ namespace AndroidXamarinChat
                 {
                     if (command is ServerEventJoin)
                     {
-                        client.GetSubscribers().ContinueWith(result =>
+                        client.GetChannelSubscribersAsync().ContinueWith(result =>
                         {
                             subscriberList = result.Result;
                             Application.SynchronizationContext.Post(_ =>

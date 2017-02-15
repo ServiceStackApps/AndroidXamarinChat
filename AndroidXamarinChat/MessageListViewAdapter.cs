@@ -13,9 +13,9 @@ namespace AndroidXamarinChat
     {
         private readonly Context context;
         private readonly List<ChatMessage> items;
-        private readonly Func<List<ServerEventCommand>> subscribers;
+        private readonly Func<List<ServerEventUser>> subscribers;
 
-        public MessageListViewAdapter(Context context, List<ChatMessage> items, Func<List<ServerEventCommand>> subscribers)
+        public MessageListViewAdapter(Context context, List<ChatMessage> items, Func<List<ServerEventUser>> subscribers)
         {
             this.context = context;
             this.items = items;
@@ -35,7 +35,7 @@ namespace AndroidXamarinChat
             var label = row.FindViewById<TextView>(Resource.Id.txtMessage);
             var message = items[position];
             string profileUrl = null;
-            var subs = new List<ServerEventCommand>(subscribers());
+            var subs = new List<ServerEventUser>(subscribers());
             foreach (var subscriber in subs)
             {
                 if (message.FromUserId == subscriber.UserId)
