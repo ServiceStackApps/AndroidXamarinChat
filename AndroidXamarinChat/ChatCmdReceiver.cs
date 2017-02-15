@@ -110,7 +110,6 @@ namespace AndroidXamarinChat
             var url = message.StartsWith("url(") ? message.Substring(4, message.Length - 5) : message;
             url.GetImageBitmap().ContinueWith(t =>
             {
-                t.Wait();
                 var bitmap = t.Result;
                 var chatBackground = parentActivity.FindViewById<ImageView>(Resource.Id.chat_background);
                 Application.SynchronizationContext.Post(_ =>

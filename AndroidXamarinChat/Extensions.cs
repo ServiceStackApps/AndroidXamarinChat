@@ -70,7 +70,7 @@ namespace AndroidXamarinChat
             client.ServiceClient.Post(request);
         }
 
-        public static void UpdateUserProfile(this ServerEventConnect connectMsg, MainActivity activity)
+        public static void UpdateUserProfile(this ServerEventConnect connectMsg, Activity activity)
         {
             Application.SynchronizationContext.Post(_ =>
             {

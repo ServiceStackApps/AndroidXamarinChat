@@ -89,7 +89,6 @@ namespace AndroidXamarinChat
                     {
                         client.GetSubscribers().ContinueWith(result =>
                         {
-                            result.Wait();
                             subscriberList = result.Result;
                             Application.SynchronizationContext.Post(_ =>
                             {
@@ -148,7 +147,6 @@ namespace AndroidXamarinChat
         {
             "https://servicestack.net/img/slide/image01.jpg".GetImageBitmap().ContinueWith(t =>
             {
-                t.Wait();
                 var bitmap = t.Result;
                 Application.SynchronizationContext.Post(_ => { chatBackground.SetImageBitmap(bitmap); }, null);
             });
@@ -162,12 +160,10 @@ namespace AndroidXamarinChat
                 var result = UiHelpers.ShowChannelDialog(this);
                 result.ContinueWith(ta =>
                 {
-                    ta.Wait();
                     try
                     {
                         string nChannel = ta.Result;
-                        var nChannels = new List<string>(client.Channels);
-                        nChannels.Add(nChannel);
+                        var nChannels = new List<string>(client.Channels) { nChannel };
                         UiHelpers.ResetChannelDrawer(this, navigationView, nChannels.ToArray());
                         client.ChangeChannel(ta.Result, cmdReceiver);
                         cmdReceiver.SyncAdapter();
