@@ -49,7 +49,7 @@ namespace AndroidXamarinChat
             var btnTwitter = FindViewById<ImageButton>(Resource.Id.btnTwitter);
             var btnAnon = FindViewById<ImageButton>(Resource.Id.btnAnon);
             var client = new JsonServiceClient(MainActivity.BaseUrl);
-            
+
             btnTwitter.Click += (sender, args) =>
             {
                 StartProgressBar();
@@ -76,7 +76,7 @@ namespace AndroidXamarinChat
                                 StartAuthChatActivity(client, existingAccount);
                                 StopProgressBar();
                             }
-                            
+
                         });
                     }
                     catch (Exception)
@@ -92,7 +92,7 @@ namespace AndroidXamarinChat
                     StopProgressBar();
                     PerformServiceStackAuth(client);
                 }
-                    
+
             };
 
             btnAnon.Click += (sender, args) =>
@@ -110,7 +110,7 @@ namespace AndroidXamarinChat
                 progressBar.Visibility = ViewStates.Visible;
                 animation.Start();
             }, null);
-            
+
         }
 
         private void StopProgressBar()
@@ -149,7 +149,7 @@ namespace AndroidXamarinChat
         private void StartAuthChatActivity(JsonServiceClient client, Account existingAccount)
         {
             client.CookieContainer = existingAccount.Cookies;
-            var intent = new Intent(this, typeof (MainActivity));
+            var intent = new Intent(this, typeof(MainActivity));
             intent.PutExtra("SSCookie", client.CookieContainer.GetCookieHeader(new Uri(MainActivity.BaseUrl)));
             StartActivity(intent);
         }
@@ -166,7 +166,7 @@ namespace AndroidXamarinChat
         {
             account = null;
             ISharedPreferences prefs = PreferenceManager.GetDefaultSharedPreferences(this);
-            string userName = prefs.GetString("TwitterUserName",null);
+            string userName = prefs.GetString("TwitterUserName", null);
             var existingTwitterAccount = AccountStore.Create(this).FindAccountsForService("Twitter");
             var twitterAccount = existingTwitterAccount.FirstOrDefault(x => x.Username == userName);
             if (twitterAccount != null)

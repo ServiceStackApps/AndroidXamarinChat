@@ -12,64 +12,67 @@ using Android.OS;
 
 namespace AndroidXamarinChat
 {
-	public class ChatCommandHandler
-	{
-		private Activity parentActivity;
-		private MessageListViewAdapter messageAdapter;
-		public Dictionary<string,List<ChatMessage>> FullHistory { get; set; }
+    public class ChatCommandHandler
+    {
+        private Activity parentActivity;
+        private MessageListViewAdapter messageAdapter;
+        public Dictionary<string, List<ChatMessage>> FullHistory { get; set; }
 
-		public string CurrentChannel  { get; set; }
+        public string CurrentChannel { get; set; }
 
-		public ChatCommandHandler(Activity parentActivity, MessageListViewAdapter messageAdapter, string initialChannel)
-		{
-			this.parentActivity = parentActivity;
-			this.messageAdapter = messageAdapter;
-			this.FullHistory = new Dictionary<string, List<ChatMessage>> ();
-			this.CurrentChannel = initialChannel;
-		}
+        public ChatCommandHandler(Activity parentActivity, MessageListViewAdapter messageAdapter, string initialChannel)
+        {
+            this.parentActivity = parentActivity;
+            this.messageAdapter = messageAdapter;
+            this.FullHistory = new Dictionary<string, List<ChatMessage>>();
+            this.CurrentChannel = initialChannel;
+        }
 
-		public void AppendMessage(ChatMessage chatMessage)
-		{
-			if (!FullHistory.ContainsKey (chatMessage.Channel)) {
-				FullHistory.Add (chatMessage.Channel, new List<ChatMessage> ());
-			}
-			FullHistory [chatMessage.Channel].Add (chatMessage);
-			if (chatMessage.Channel == this.CurrentChannel) {
-				Application.SynchronizationContext.Post(_ =>
-				{
+        public void AppendMessage(ChatMessage chatMessage)
+        {
+            if (!FullHistory.ContainsKey(chatMessage.Channel))
+            {
+                FullHistory.Add(chatMessage.Channel, new List<ChatMessage>());
+            }
+            FullHistory[chatMessage.Channel].Add(chatMessage);
+            if (chatMessage.Channel == this.CurrentChannel)
+            {
+                Application.SynchronizationContext.Post(_ =>
+                {
                     messageAdapter.Add(chatMessage);
                     messageAdapter.NotifyDataSetChanged();
-                },null);
-			}
-		}
+                }, null);
+            }
+        }
 
-		public void ChangeChannel(string channel)
-		{
-			this.CurrentChannel = channel;
-			Application.SynchronizationContext.Post(_ =>
-			{
+        public void ChangeChannel(string channel)
+        {
+            this.CurrentChannel = channel;
+            Application.SynchronizationContext.Post(_ =>
+            {
                 messageAdapter.Clear();
                 if (FullHistory.ContainsKey(channel))
                 {
-                    FullHistory[channel].ForEach(msg => {
+                    FullHistory[channel].ForEach(msg =>
+                    {
                         messageAdapter.Add(msg);
                     });
                 }
-            },null);
-		}
+            }, null);
+        }
 
-		public void SyncAdapter()
-		{
-			ChangeChannel (this.CurrentChannel);
-		}
+        public void SyncAdapter()
+        {
+            ChangeChannel(this.CurrentChannel);
+        }
 
-		public void ShowVideo(string videoUrl)
-		{
-			parentActivity.StartActivity(new Intent(Intent.ActionView, Android.Net.Uri.Parse(videoUrl)));
-		}
+        public void ShowVideo(string videoUrl)
+        {
+            parentActivity.StartActivity(new Intent(Intent.ActionView, Android.Net.Uri.Parse(videoUrl)));
+        }
 
-		public void Announce(string message)
-		{
+        public void Announce(string message)
+        {
             Notification.Builder builder = new Notification.Builder(parentActivity)
                                 .SetLocalOnly(true)
                                 .SetAutoCancel(true)
@@ -86,74 +89,77 @@ namespace AndroidXamarinChat
 
             // Publish the notification:
             const int notificationId = 0;
-		    if (notificationManager != null)
-		    {
-		        notificationManager.Notify(notificationId, notification);
+            if (notificationManager != null)
+            {
+                notificationManager.Notify(notificationId, notification);
 
-		        Vibrator vibrator = (Vibrator)parentActivity.GetSystemService(Context.VibratorService);
-		        vibrator.Vibrate(1000);
-		        CancelNotification(notificationManager).ConfigureAwait(false);
-		    }
-		}
+                Vibrator vibrator = (Vibrator)parentActivity.GetSystemService(Context.VibratorService);
+                vibrator.Vibrate(1000);
+                CancelNotification(notificationManager).ConfigureAwait(false);
+            }
+        }
 
-	    private async Task CancelNotification(NotificationManager notificationManager)
-	    {
-	        await Task.Delay(5000);
+        private async Task CancelNotification(NotificationManager notificationManager)
+        {
+            await Task.Delay(5000);
             notificationManager.CancelAll();
-	    }
+        }
 
-	    public void ChangeBackground(string message)
-	    {
-	        var url = message.StartsWith("url(") ? message.Substring(4, message.Length - 5) : message;
-	        url.GetImageBitmap().ContinueWith(t =>
-	        {
-	            t.Wait();
+        public void ChangeBackground(string message)
+        {
+            var url = message.StartsWith("url(") ? message.Substring(4, message.Length - 5) : message;
+            url.GetImageBitmap().ContinueWith(t =>
+            {
+                t.Wait();
                 var bitmap = t.Result;
                 var chatBackground = parentActivity.FindViewById<ImageView>(Resource.Id.chat_background);
                 Application.SynchronizationContext.Post(_ =>
                 {
                     chatBackground.SetImageBitmap(bitmap);
-                },null);
-             });
+                }, null);
+            });
         }
 
-	    public void ChangeBackgroundColor(string message)
-	    {
+        public void ChangeBackgroundColor(string message)
+        {
             // Inject alpha values
-	        string color = message.Replace("#", "#AA");
-	        var chatLayout = parentActivity.FindViewById<ListView>(Resource.Id.messageHistory);
-	        var editText = parentActivity.FindViewById<EditText>(Resource.Id.message);
-	        var sendButton = parentActivity.FindViewById<Button>(Resource.Id.sendMessageButton);
+            string color = message.Replace("#", "#AA");
+            var chatLayout = parentActivity.FindViewById<ListView>(Resource.Id.messageHistory);
+            var editText = parentActivity.FindViewById<EditText>(Resource.Id.message);
+            var sendButton = parentActivity.FindViewById<Button>(Resource.Id.sendMessageButton);
             Application.SynchronizationContext.Post(_ =>
             {
                 chatLayout.SetBackgroundColor(Color.ParseColor(color));
                 editText.SetBackgroundColor(Color.ParseColor(color));
                 sendButton.SetBackgroundColor(Color.ParseColor(color));
             }, null);
-	    }
-	}
+        }
+    }
 
-	public class MessageResolver : IResolver
-	{
-		ChatCommandHandler messageHandler;
-		public MessageResolver(ChatCommandHandler messageHandler)
-		{
-			this.messageHandler = messageHandler;
-		}
+    public class MessageResolver : IResolver
+    {
+        ChatCommandHandler messageHandler;
+        public MessageResolver(ChatCommandHandler messageHandler)
+        {
+            this.messageHandler = messageHandler;
+        }
 
-		public T TryResolve<T> ()
-		{
-			if (typeof(T) == typeof(ChatReceiver)) {
-				return (T)(new ChatReceiver (this.messageHandler) as object);
-			}
-            if (typeof(T) == typeof(TvReciever)) {
-				return (T)(new TvReciever (this.messageHandler) as object);
-			}
-		    if (typeof (T) == typeof (CssReceiver)) {
-		        return (T)(new CssReceiver(this.messageHandler) as object);
-		    }
-			
-			return typeof(T).CreateInstance<T> ();
-		}
-	}
+        public T TryResolve<T>()
+        {
+            if (typeof(T) == typeof(ChatReceiver))
+            {
+                return (T)(new ChatReceiver(this.messageHandler) as object);
+            }
+            if (typeof(T) == typeof(TvReciever))
+            {
+                return (T)(new TvReciever(this.messageHandler) as object);
+            }
+            if (typeof(T) == typeof(CssReceiver))
+            {
+                return (T)(new CssReceiver(this.messageHandler) as object);
+            }
+
+            return typeof(T).CreateInstance<T>();
+        }
+    }
 }

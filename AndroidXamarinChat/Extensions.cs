@@ -10,40 +10,40 @@ using Android.Widget;
 
 namespace AndroidXamarinChat
 {
-	public static class Extensions
-	{
-		public static string DisplayMessage(this ChatMessage chatMessage)
-		{
-			return chatMessage.FromName + ": " + chatMessage.Message + "\n";
-		}
+    public static class Extensions
+    {
+        public static string DisplayMessage(this ChatMessage chatMessage)
+        {
+            return chatMessage.FromName + ": " + chatMessage.Message + "\n";
+        }
 
-	    public static Task UpdateChatHistory(this ServerEventsClient client, ChatCommandHandler cmdReceiver)
-	    {
-	        return Task.Run(() =>
-	        {
-	            var chatHistory = client.ServiceClient.Get(new GetChatHistory
-	            {
-	                Channels = client.Channels
-	            });
-	            cmdReceiver.FullHistory = new Dictionary<string, List<ChatMessage>>();
-	            try
-	            {
-	                foreach (var channel in client.Channels)
-	                {
-	                    var currentChannel = channel;
-	                    cmdReceiver.FullHistory.Add(channel,
-	                        chatHistory.Results
-	                            .Where(x => x.Channel == currentChannel)
-	                            .Select(x => x).ToList());
-	                }
-	            }
-	            catch (Exception e)
-	            {
-	                Console.WriteLine(e);
-	            }
-	            cmdReceiver.SyncAdapter();
-	        });
-	    }
+        public static Task UpdateChatHistory(this ServerEventsClient client, ChatCommandHandler cmdReceiver)
+        {
+            return Task.Run(() =>
+            {
+                var chatHistory = client.ServiceClient.Get(new GetChatHistory
+                {
+                    Channels = client.Channels
+                });
+                cmdReceiver.FullHistory = new Dictionary<string, List<ChatMessage>>();
+                try
+                {
+                    foreach (var channel in client.Channels)
+                    {
+                        var currentChannel = channel;
+                        cmdReceiver.FullHistory.Add(channel,
+                            chatHistory.Results
+                                .Where(x => x.Channel == currentChannel)
+                                .Select(x => x).ToList());
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+                cmdReceiver.SyncAdapter();
+            });
+        }
 
         public static void ChangeChannel(this ServerEventsClient client, string channel, ChatCommandHandler cmdReceiver)
         {
@@ -53,7 +53,8 @@ namespace AndroidXamarinChat
             {
                 cmdReceiver.ChangeChannel(channel);
             }
-            else {
+            else
+            {
 
                 if (!currentChannels.Contains(channel))
                     currentChannels.Add(channel);
@@ -99,12 +100,12 @@ namespace AndroidXamarinChat
             }
         }
 
-		public static Task<List<ServerEventCommand>> GetSubscribers(this ServerEventsClient client)
-		{
-			var task = client.ServiceClient.GetAsync<List<ServerEventCommand>>(
-				"/event-subscribers?{0}".Fmt(client.Channels.Join(",")));
-				task.ConfigureAwait(false);
-			return task;
-		}
+        public static Task<List<ServerEventCommand>> GetSubscribers(this ServerEventsClient client)
+        {
+            var task = client.ServiceClient.GetAsync<List<ServerEventCommand>>(
+                "/event-subscribers?{0}".Fmt(client.Channels.Join(",")));
+            task.ConfigureAwait(false);
+            return task;
+        }
     }
 }

@@ -15,10 +15,10 @@ namespace AndroidXamarinChat
         ServiceClientBase jsonServiceClient;
 
         public Func<string, ServiceClientBase> ServiceClientFactory { get; set; }
-        public Func<Uri,bool> OnSuccessPredicate { get; set; }
+        public Func<Uri, bool> OnSuccessPredicate { get; set; }
         Account account;
 
-        public ServiceStackAuthenticator(string serviceStackBaseUrl, 
+        public ServiceStackAuthenticator(string serviceStackBaseUrl,
             string provider,
             Func<ServiceClientBase, Account> getUserDetails)
         {
@@ -49,7 +49,7 @@ namespace AndroidXamarinChat
                 var cookie = Android.Webkit.CookieManager.Instance.GetCookie(url.AbsoluteUri);
                 jsonServiceClient.CookieContainer = jsonServiceClient.CookieContainer ?? new CookieContainer();
                 jsonServiceClient.CookieContainer.SetCookies(new Uri(url.AbsoluteUri), cookie);
-                
+
                 account = getCustomUserDetails(jsonServiceClient);
                 OnSucceeded(account);
             }

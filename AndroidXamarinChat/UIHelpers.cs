@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using Android.Widget;
 using Android.App;
 using System.IO;
@@ -16,47 +15,47 @@ using ServiceStack;
 
 namespace AndroidXamarinChat
 {
-	public static class UiHelpers
-	{
-		public const string CreateChannelLabel = "      Join";
+    public static class UiHelpers
+    {
+        public const string CreateChannelLabel = "      Join";
 
-		public static Task<string> ShowChannelDialog(Activity activity)
-		{
-			var tcs = new TaskCompletionSource<string>();
-			var inputDialog = new Android.Support.V7.App.AlertDialog.Builder(activity);
-		    var userInput = new EditText(inputDialog.Context) {Hint = "Join Channel"};
-		    string selectedInput = "Join Channel";
-			userInput.Text = "general";
-			//SetEditTextStylings(userInput);
-			userInput.InputType = Android.Text.InputTypes.ClassText;
-			inputDialog.SetTitle(selectedInput);
-			inputDialog.SetView(userInput);
-			inputDialog.SetPositiveButton(
-				"Ok",
-				(see, ess) =>
-				{
-				    tcs.SetResult(userInput.Text != string.Empty ? userInput.Text : "");
-				    //HideKeyboard(userInput);
-				    HideKeyboard(activity, userInput);
-				});
-			inputDialog.SetNegativeButton("Cancel", (afk, kfa) => HideKeyboard(activity, userInput));
-			inputDialog.Show();
-			return tcs.Task;
-		}
+        public static Task<string> ShowChannelDialog(Activity activity)
+        {
+            var tcs = new TaskCompletionSource<string>();
+            var inputDialog = new Android.Support.V7.App.AlertDialog.Builder(activity);
+            var userInput = new EditText(inputDialog.Context) { Hint = "Join Channel" };
+            string selectedInput = "Join Channel";
+            userInput.Text = "general";
+            //SetEditTextStylings(userInput);
+            userInput.InputType = Android.Text.InputTypes.ClassText;
+            inputDialog.SetTitle(selectedInput);
+            inputDialog.SetView(userInput);
+            inputDialog.SetPositiveButton(
+                "Ok",
+                (see, ess) =>
+                {
+                    tcs.SetResult(userInput.Text != string.Empty ? userInput.Text : "");
+                    //HideKeyboard(userInput);
+                    HideKeyboard(activity, userInput);
+                });
+            inputDialog.SetNegativeButton("Cancel", (afk, kfa) => HideKeyboard(activity, userInput));
+            inputDialog.Show();
+            return tcs.Task;
+        }
 
-		private static void HideKeyboard(Context parentActivity,View userInput)
-		{
-			Application.SynchronizationContext.Post(_ =>
-			{
+        private static void HideKeyboard(Context parentActivity, View userInput)
+        {
+            Application.SynchronizationContext.Post(_ =>
+            {
                 var imm = (InputMethodManager)parentActivity.GetSystemService(Context.InputMethodService);
                 imm.HideSoftInputFromWindow(userInput.WindowToken, 0);
-            },null);
-		}
+            }, null);
+        }
 
-		public static void ResetChannelDrawer(Activity parentActivity, NavigationView navigationView, string[] channels)
-		{
-			Application.SynchronizationContext.Post(_ =>
-			{
+        public static void ResetChannelDrawer(Activity parentActivity, NavigationView navigationView, string[] channels)
+        {
+            Application.SynchronizationContext.Post(_ =>
+            {
                 var subMenu = navigationView.Menu.GetItem(0).SubMenu;
                 subMenu.Clear();
                 foreach (string channel in channels)
@@ -70,10 +69,10 @@ namespace AndroidXamarinChat
                 createChanMenuItem.SetIcon(Resource.Drawable.ic_plus_circle_white_24dp);
                 navigationView.RefreshDrawableState();
             }, null);
-		}
+        }
 
-	    public static void SelectChannel(Activity parentActivity, NavigationView navigationView, string channel)
-	    {
+        public static void SelectChannel(Activity parentActivity, NavigationView navigationView, string channel)
+        {
             Application.SynchronizationContext.Post(_ =>
             {
                 var subMenu = navigationView.Menu.GetItem(0).SubMenu;
@@ -91,14 +90,14 @@ namespace AndroidXamarinChat
                 }
 
                 navigationView.RefreshDrawableState();
-            },null);
+            }, null);
         }
 
-	    public static void UpdateImageViewSrc(Activity activity, int imageViewRsc, string url)
-	    {
+        public static void UpdateImageViewSrc(Activity activity, int imageViewRsc, string url)
+        {
 
-	        url.GetImageBitmap().ContinueWith(t =>
-	        {
+            url.GetImageBitmap().ContinueWith(t =>
+            {
                 Application.SynchronizationContext.Post(_ =>
                 {
                     var bitmap = t.Result;
@@ -106,15 +105,15 @@ namespace AndroidXamarinChat
                     imageView.SetImageBitmap(bitmap);
 
                 }, null);
-	        });
-	    }
+            });
+        }
 
-        private static readonly ConcurrentDictionary<string,byte[]> BackgroundCache = new ConcurrentDictionary<string, byte[]>(); 
+        private static readonly ConcurrentDictionary<string, byte[]> BackgroundCache = new ConcurrentDictionary<string, byte[]>();
 
-	    public static Task<Bitmap> GetImageBitmap(this string url)
-	    {
-	        var task = new Task<Bitmap>(() =>
-	        {
+        public static Task<Bitmap> GetImageBitmap(this string url)
+        {
+            var task = new Task<Bitmap>(() =>
+            {
                 byte[] bytes;
                 if (BackgroundCache.ContainsKey(url))
                 {
@@ -128,11 +127,11 @@ namespace AndroidXamarinChat
                 var bitmap = BitmapFactory.DecodeByteArray(bytes, 0, bytes.Length);
                 return bitmap;
             });
-	        task.ConfigureAwait(false);
+            task.ConfigureAwait(false);
             task.Start();
             return task;
-	    }
-	}
+        }
+    }
 
     public static class UserImageHandler
     {
@@ -174,7 +173,7 @@ namespace AndroidXamarinChat
                 byte[] bytes = ms.ToBytes();
                 using (var fs = File.Create(imagePath))
                 {
-                    fs.Write(bytes,0,bytes.Length);
+                    fs.Write(bytes, 0, bytes.Length);
                 }
             }
         }
