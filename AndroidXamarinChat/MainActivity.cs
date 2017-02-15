@@ -72,17 +72,16 @@ namespace AndroidXamarinChat
 			var messageHistoryAdapter = new MessageListViewAdapter(this, new List<ChatMessage>(), () => this.subscriberList);
 			messageHistoryList.Adapter = messageHistoryAdapter;
 
-		    var txtUser = FindViewById<TextView>(Resource.Id.txtUserName);
-		    var imgProfile = FindViewById<ImageView>(Resource.Id.imgProfile);
-		    var channels = new[] {"home"};
+            var channels = new[] {"home"};
 			cmdReceiver = new ChatCommandHandler (this, messageHistoryAdapter, "home");
+		    var activity = this;
 
 		    client = new ServerEventsClient(BaseUrl, channels)
 		    {
 		        OnConnect = connectMsg =>
 		        {
 		            client.UpdateChatHistory(cmdReceiver).ConfigureAwait(false);
-		            connectMsg.UpdateUserProfile(txtUser, imgProfile);
+		            connectMsg.UpdateUserProfile(activity);
 		        },
                 OnCommand = command =>
                 {

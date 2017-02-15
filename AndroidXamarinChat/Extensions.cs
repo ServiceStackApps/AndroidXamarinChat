@@ -69,8 +69,11 @@ namespace AndroidXamarinChat
             client.ServiceClient.Post(request);
         }
 
-        public static void UpdateUserProfile(this ServerEventConnect connectMsg,TextView txtUser, ImageView imgProfile)
+        public static void UpdateUserProfile(this ServerEventConnect connectMsg, MainActivity activity)
         {
+            var txtUser = activity.FindViewById<TextView>(Resource.Id.txtUserName);
+            var imgProfile = activity.FindViewById<ImageView>(Resource.Id.imgProfile);
+
             Application.SynchronizationContext.Post(_ => { txtUser.Text = connectMsg.DisplayName; }, null);
             connectMsg.ProfileUrl.GetImageBitmap()
                 .ContinueWith(
