@@ -14,7 +14,7 @@ namespace AndroidXamarinChat
     {
         public static string DisplayMessage(this ChatMessage chatMessage)
         {
-            return chatMessage.FromName + ": " + chatMessage.Message + "\n";
+            return (chatMessage.FromName + ": " + chatMessage.Message + "\n").UnescapeHtml();
         }
 
         public static Task UpdateChatHistory(this ServerEventsClient client, ChatCommandHandler cmdReceiver)
@@ -103,6 +103,16 @@ namespace AndroidXamarinChat
                 var val = c.Split('=')[1].Trim();
                 client.ServiceClient.SetCookie(key, val);
             }
+        }
+
+        public static string UnescapeHtml(this string html)
+        {
+            return html
+                .Replace("&lt;", "<")
+                .Replace("&gt;", ">")
+                .Replace("&amp;", "&")
+                .Replace("&#39;", "\'")
+                .Replace("&quot;", "\"");
         }
     }
 }
