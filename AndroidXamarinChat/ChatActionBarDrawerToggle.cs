@@ -9,10 +9,10 @@ namespace AndroidXamarinChat
 {
     public class ChatActionBarDrawerToggle : ActionBarDrawerToggle
     {
-        private AppCompatActivity mHostActivity;
+        private AppCompatActivity hostActivity;
         private readonly DrawerLayout drawerLayout;
-        private int mOpenedResource;
-        private int mClosedResource;
+        private int openedResource;
+        private int closedResource;
 
         private bool rightIsClosed = true;
         private bool leftIsClosed = true;
@@ -24,10 +24,10 @@ namespace AndroidXamarinChat
             int closedResource)
             : base(host, drawerLayout, toolbar, openedResource, closedResource)
         {
-            mHostActivity = host;
+            hostActivity = host;
             this.drawerLayout = drawerLayout;
-            mOpenedResource = openedResource;
-            mClosedResource = closedResource;
+            this.openedResource = openedResource;
+            this.closedResource = closedResource;
         }
 
         public override void OnDrawerOpened(View drawerView)
@@ -37,7 +37,7 @@ namespace AndroidXamarinChat
             if (drawerType == 0)
             {
                 base.OnDrawerOpened(drawerView);
-                mHostActivity.SupportActionBar.SetTitle(mOpenedResource);
+                hostActivity.SupportActionBar.SetTitle(openedResource);
             }
 
             if (drawerView.Id == Resource.Id.nav_view)
@@ -54,7 +54,7 @@ namespace AndroidXamarinChat
             if (drawerType == 0)
             {
                 base.OnDrawerClosed(drawerView);
-                mHostActivity.SupportActionBar.SetTitle(mClosedResource);
+                hostActivity.SupportActionBar.SetTitle(closedResource);
             }
 
             if (drawerView.Id == Resource.Id.nav_view)
@@ -68,8 +68,8 @@ namespace AndroidXamarinChat
         {
             int drawerType = (int)drawerView.Tag;
 
-            var leftDrawer = mHostActivity.FindViewById<NavigationView>(Resource.Id.nav_view);
-            var rightDrawer = mHostActivity.FindViewById<ListView>(Resource.Id.right_drawer);
+            var leftDrawer = hostActivity.FindViewById<NavigationView>(Resource.Id.nav_view);
+            var rightDrawer = hostActivity.FindViewById<ListView>(Resource.Id.right_drawer);
             switch (drawerView.Id)
             {
                 case Resource.Id.right_drawer:

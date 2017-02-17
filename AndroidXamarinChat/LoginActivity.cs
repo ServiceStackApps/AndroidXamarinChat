@@ -33,8 +33,8 @@ namespace AndroidXamarinChat
             // Set our view from the "main" layout resource
             SetContentView(Resource.Layout.login);
 
-            SupportToolbar mToolbar = FindViewById<SupportToolbar>(Resource.Id.loginToolbar);
-            SetSupportActionBar(mToolbar);
+            SupportToolbar toolbar = FindViewById<SupportToolbar>(Resource.Id.loginToolbar);
+            SetSupportActionBar(toolbar);
             SupportActionBar.SetHomeButtonEnabled(true);
             SupportActionBar.SetDisplayShowTitleEnabled(true);
 

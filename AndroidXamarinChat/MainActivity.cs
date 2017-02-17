@@ -23,9 +23,9 @@ namespace AndroidXamarinChat
     public class MainActivity : AppCompatActivity
     {
         public const string BaseUrl = "http://chat.servicestack.net/";
-        private ChatActionBarDrawerToggle mDrawerToggle;
-        private DrawerLayout mDrawerLayout;
-        private ListView mRightDrawer;
+        private ChatActionBarDrawerToggle drawerToggle;
+        private DrawerLayout drawerLayout;
+        private ListView rightDrawer;
         private NavigationView navigationView;
 
         private EditText messageBox;
@@ -58,16 +58,16 @@ namespace AndroidXamarinChat
             // and attach an event to it
             Button sendButton = FindViewById<Button>(Resource.Id.sendMessageButton);
             messageBox = FindViewById<EditText>(Resource.Id.message);
-            SupportToolbar mToolbar = FindViewById<SupportToolbar>(Resource.Id.toolbar);
-            mDrawerLayout = FindViewById<DrawerLayout>(Resource.Id.drawer_layout);
+            SupportToolbar toolbar = FindViewById<SupportToolbar>(Resource.Id.toolbar);
+            drawerLayout = FindViewById<DrawerLayout>(Resource.Id.drawer_layout);
             navigationView = FindViewById<NavigationView>(Resource.Id.nav_view);
-            mRightDrawer = FindViewById<ListView>(Resource.Id.right_drawer);
+            rightDrawer = FindViewById<ListView>(Resource.Id.right_drawer);
             var messageHistoryList = FindViewById<ListView>(Resource.Id.messageHistory);
             var chatBackground = FindViewById<ImageView>(Resource.Id.chat_background);
             InitDefaultBackground(chatBackground);
 
             navigationView.Tag = 0;
-            mRightDrawer.Tag = 1;
+            rightDrawer.Tag = 1;
 
             var messageHistoryAdapter = new MessageListViewAdapter(this, new List<ChatMessage>(), () => this.subscriberList);
             messageHistoryList.Adapter = messageHistoryAdapter;
@@ -111,24 +111,24 @@ namespace AndroidXamarinChat
             client.RegisterNamedReceiver<TvReciever>("tv");
             client.RegisterNamedReceiver<CssReceiver>("css");
 
-            SetSupportActionBar(mToolbar);
+            SetSupportActionBar(toolbar);
 
-            var mRightDataSet = new List<string>(commands.Keys);
-            var mRightAdapter = new ActionListViewAdapter(this, mRightDataSet);
-            mRightDrawer.Adapter = mRightAdapter;
-            mRightDrawer.ItemClick += (sender, args) =>
+            var rightDataSet = new List<string>(commands.Keys);
+            var rightAdapter = new ActionListViewAdapter(this, rightDataSet);
+            rightDrawer.Adapter = rightAdapter;
+            rightDrawer.ItemClick += (sender, args) =>
             {
                 Application.SynchronizationContext.Post(_ =>
                 {
-                    messageBox.Text = commands[mRightDataSet[args.Position]];
-                    mDrawerLayout.CloseDrawer(mRightDrawer);
+                    messageBox.Text = commands[rightDataSet[args.Position]];
+                    drawerLayout.CloseDrawer(rightDrawer);
                 }, null);
             };
 
-            mDrawerToggle = new ChatActionBarDrawerToggle(
+            drawerToggle = new ChatActionBarDrawerToggle(
                 this,                           //Host Activity
-                mDrawerLayout,                  //DrawerLayout
-                mToolbar,                       // Instance of toolbar, if you use other ctor, the hamburger icon/arrow animation won't work..
+                drawerLayout,                  //DrawerLayout
+                toolbar,                       // Instance of toolbar, if you use other ctor, the hamburger icon/arrow animation won't work..
                 Resource.String.openDrawer,     //Opened Message
                 Resource.String.closeDrawer     //Closed Message
             );
@@ -136,8 +136,8 @@ namespace AndroidXamarinChat
             SupportActionBar.SetHomeButtonEnabled(true);
             SupportActionBar.SetDisplayShowTitleEnabled(true);
 
-            mDrawerLayout.SetDrawerListener(mDrawerToggle);
-            mDrawerToggle.SyncState();
+            drawerLayout.SetDrawerListener(drawerToggle);
+            drawerToggle.SyncState();
 
             navigationView.NavigationItemSelected += OnChannelClick;
             sendButton.Click += OnSendClick;
@@ -179,7 +179,7 @@ namespace AndroidXamarinChat
                 //Change channel
                 client.ChangeChannel(itemText, cmdReceiver);
             }
-            mDrawerLayout.CloseDrawer(navigationView);
+            drawerLayout.CloseDrawer(navigationView);
         }
 
         public void OnSendClick(object sender, EventArgs e)
@@ -233,16 +233,16 @@ namespace AndroidXamarinChat
             switch (item.ItemId)
             {
                 case Resource.Id.action_help:
-                    if (mDrawerLayout.IsDrawerOpen(mRightDrawer))
+                    if (drawerLayout.IsDrawerOpen(rightDrawer))
                     {
                         //Right Drawer is already open, close it
-                        mDrawerLayout.CloseDrawer(mRightDrawer);
+                        drawerLayout.CloseDrawer(rightDrawer);
                     }
                     else
                     {
                         //Right Drawer is closed, open it and just in case close left drawer
-                        mDrawerLayout.OpenDrawer(mRightDrawer);
-                        mDrawerLayout.CloseDrawer(navigationView);
+                        drawerLayout.OpenDrawer(rightDrawer);
+                        drawerLayout.CloseDrawer(navigationView);
                     }
                     return true;
                 default:
@@ -262,7 +262,7 @@ namespace AndroidXamarinChat
 
             this.UpdateCookiesFromIntent(client);
 
-            mDrawerToggle.SyncState();
+            drawerToggle.SyncState();
             UiHelpers.ResetChannelDrawer(this, navigationView, client.Channels);
             client.Connect().ConfigureAwait(false);
         }
@@ -270,7 +270,7 @@ namespace AndroidXamarinChat
         public override void OnConfigurationChanged(Android.Content.Res.Configuration newConfig)
         {
             base.OnConfigurationChanged(newConfig);
-            mDrawerToggle.OnConfigurationChanged(newConfig);
+            drawerToggle.OnConfigurationChanged(newConfig);
         }
 
         protected override void OnDestroy()
