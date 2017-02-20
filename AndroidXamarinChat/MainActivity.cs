@@ -41,11 +41,11 @@ namespace AndroidXamarinChat
         {
             { "Announce Hello", "/cmd.announce Hello from Xamarin.Android" },
             { "Play YouTube",   "/tv.watch https://youtu.be/u5CVsCnxyXg" },
-            { "Background Image", "/css.background-image url(http://bit.ly/2lZxbHv)" },
-            { "Background Top", "/css.background$#top #0091ea" },
-            { "Background", "/css.background #fffde7" },
-            { "Background Bottom", "/css.background$#bottom #cccccc" },
-            { "Logout","/logout" }
+            { "Background Image", "/css.background-image url(http://bit.ly/2lxT0gh)" },
+            { "Background Top", "/css.background$#top #cccccc" },
+            { "Background", "/css.background #fdffe7" },
+            { "Background Bottom", "/css.background$#bottom #0091ea" },
+            { "Logout", "/logout" }
         };
 
         protected override void OnCreate(Bundle bundle)
