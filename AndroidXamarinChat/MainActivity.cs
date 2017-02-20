@@ -39,11 +39,13 @@ namespace AndroidXamarinChat
 
         private readonly Dictionary<string, string> commands = new Dictionary<string, string>
         {
-            {"Announce Hello","/cmd.announce Hello from Android"},
-            { "Play YouTube", "/tv.watch https://youtu.be/u5CVsCnxyXg" },
-            { "Set background color", "/css.background$#top #0091ea"},
-            { "Reset background color", "/css.background$#top #ffffff"},
-            {"Logout","/logout" }
+            { "Announce Hello", "/cmd.announce Hello from Xamarin.Android" },
+            { "Play YouTube",   "/tv.watch https://youtu.be/u5CVsCnxyXg" },
+            { "Background Image", "/css.background-image url(http://bit.ly/2lZxbHv)" },
+            { "Background Top", "/css.background$#top #0091ea" },
+            { "Background", "/css.background #fffde7" },
+            { "Background Bottom", "/css.background$#bottom #cccccc" },
+            { "Logout","/logout" }
         };
 
         protected override void OnCreate(Bundle bundle)

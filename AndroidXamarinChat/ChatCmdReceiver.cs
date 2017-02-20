@@ -8,19 +8,20 @@ using Android.Content;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Android.Graphics;
+using Android.Graphics.Drawables;
 using Android.OS;
 
 namespace AndroidXamarinChat
 {
     public class ChatCommandHandler
     {
-        private Activity parentActivity;
+        private MainActivity parentActivity;
         private MessageListViewAdapter messageAdapter;
         public Dictionary<string, List<ChatMessage>> FullHistory { get; set; }
 
         public string CurrentChannel { get; set; }
 
-        public ChatCommandHandler(Activity parentActivity, MessageListViewAdapter messageAdapter, string initialChannel)
+        public ChatCommandHandler(MainActivity parentActivity, MessageListViewAdapter messageAdapter, string initialChannel)
         {
             this.parentActivity = parentActivity;
             this.messageAdapter = messageAdapter;
@@ -119,25 +120,41 @@ namespace AndroidXamarinChat
             });
         }
 
-        public void ChangeBackgroundColor(string message)
+        public void ChangeBackgroundColor(string message, string cssSelector)
         {
             // Inject alpha values
             string color = message.Replace("#", "#AA");
             var chatLayout = parentActivity.FindViewById<ListView>(Resource.Id.messageHistory);
             var editText = parentActivity.FindViewById<EditText>(Resource.Id.message);
             var sendButton = parentActivity.FindViewById<Button>(Resource.Id.sendMessageButton);
+
+            var colorValue = Color.ParseColor(color);
             Application.SynchronizationContext.Post(_ =>
             {
-                chatLayout.SetBackgroundColor(Color.ParseColor(color));
-                editText.SetBackgroundColor(Color.ParseColor(color));
-                sendButton.SetBackgroundColor(Color.ParseColor(color));
+                if (cssSelector == "#top")
+                {
+                    parentActivity.SupportActionBar.SetBackgroundDrawable(new ColorDrawable(colorValue));
+                }
+
+                if (cssSelector == "#body" || cssSelector == null)
+                {
+                    chatLayout.SetBackgroundColor(colorValue);
+                    var chatBackground = parentActivity.FindViewById<ImageView>(Resource.Id.chat_background);
+                    chatBackground.SetImageDrawable(null);
+                }
+
+                if (cssSelector == "#bottom")
+                {
+                    editText.SetBackgroundColor(colorValue);
+                    sendButton.SetBackgroundColor(colorValue);
+                }
             }, null);
         }
     }
 
     public class MessageResolver : IResolver
     {
-        ChatCommandHandler messageHandler;
+        readonly ChatCommandHandler messageHandler;
         public MessageResolver(ChatCommandHandler messageHandler)
         {
             this.messageHandler = messageHandler;
