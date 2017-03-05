@@ -3673,9 +3673,6 @@ namespace AndroidXamarinChat
 			// aapt resource value: 0x7f070014
 			public const int useLogo = 2131165204;
 			
-			// aapt resource value: 0x7f07009a
-			public const int usersGroup = 2131165338;
-			
 			// aapt resource value: 0x7f07000a
 			public const int view_offset_helper = 2131165194;
 			
