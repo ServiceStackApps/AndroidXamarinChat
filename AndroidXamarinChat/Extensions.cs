@@ -58,23 +58,20 @@ namespace AndroidXamarinChat
             client.ServiceClient.Post(request);
         }
 
-        public static void UpdateUserProfile(this ServerEventConnect connectMsg, Activity activity)
+        public static async Task UpdateUserProfile(this ServerEventConnect connectMsg, Activity activity)
         {
             Application.SynchronizationContext.Post(_ =>
             {
                 var txtUser = activity.FindViewById<TextView>(Resource.Id.txtUserName);
                 txtUser.Text = connectMsg.DisplayName;
             }, null);
-            connectMsg.ProfileUrl.GetImageBitmap()
-                .ContinueWith(
-                    bitmap =>
-                    {
-                        Application.SynchronizationContext.Post(_ =>
-                        {
-                            var imgProfile = activity.FindViewById<ImageView>(Resource.Id.imgProfile);
-                            imgProfile.SetImageBitmap(bitmap.Result);
-                        }, null);
-                    });
+
+            var bitmap = await connectMsg.ProfileUrl.GetImageBitmap();
+            Application.SynchronizationContext.Post(_ =>
+            {
+                var imgProfile = activity.FindViewById<ImageView>(Resource.Id.imgProfile);
+                imgProfile.SetImageBitmap(bitmap);
+            }, null);
         }
 
         public static void UpdateCookiesFromIntent(this MainActivity mainActivity, ServerEventsClient client)

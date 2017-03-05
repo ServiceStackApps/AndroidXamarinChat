@@ -5,6 +5,8 @@ using ServiceStack;
 using Chat;
 using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using SupportToolbar = Android.Support.V7.Widget.Toolbar;
 using Android.Support.V7.App;
 using Android.Support.V4.Widget;
@@ -82,30 +84,28 @@ namespace AndroidXamarinChat
             {
                 OnConnect = connectMsg =>
                 {
-                    client.UpdateChatHistory(cmdReceiver).ConfigureAwait(false);
-                    connectMsg.UpdateUserProfile(activity);
+                    client.UpdateChatHistory(cmdReceiver)
+                    .ContinueWith(t => 
+                        connectMsg.UpdateUserProfile(activity));
                 },
                 OnCommand = command =>
                 {
                     if (command is ServerEventJoin)
                     {
-                        client.GetChannelSubscribersAsync().ContinueWith(result =>
-                        {
-                            subscriberList = result.Result;
-                            Application.SynchronizationContext.Post(_ =>
-                            {
-                                // Refresh profile icons when users join
-                                messageHistoryAdapter.NotifyDataSetChanged();
-                            }, null);
-                        });
+                        client.GetChannelSubscribersAsync()
+                            .ContinueWith(t => {
+                                subscriberList = t.Result;
+                                Application.SynchronizationContext.Post(_ => {
+                                    // Refresh profile icons when users join
+                                    messageHistoryAdapter.NotifyDataSetChanged();
+                                }, null);
+                            });
                     }
                 },
-                OnException =
-                    error =>
-                    {
-                        Application.SynchronizationContext.Post(
-                            _ => { Toast.MakeText(this, "Error : " + error.Message, ToastLength.Long); }, null);
-                    },
+                OnException = error => {
+                    Application.SynchronizationContext.Post(
+                        _ => { Toast.MakeText(this, "Error : " + error.Message, ToastLength.Long); }, null);
+                },
                 //ServiceClient = new JsonHttpClient(BaseUrl),
                 Resolver = new MessageResolver(cmdReceiver)
             };
@@ -142,7 +142,7 @@ namespace AndroidXamarinChat
             drawerToggle.SyncState();
 
             navigationView.NavigationItemSelected += OnChannelClick;
-            sendButton.Click += OnSendClick;
+            sendButton.Click += async (e,args) => { await OnSendClick(e, args); };
         }
 
         private static void InitDefaultBackground(ImageView chatBackground)
@@ -177,7 +177,7 @@ namespace AndroidXamarinChat
             drawerLayout.CloseDrawer(navigationView);
         }
 
-        public void OnSendClick(object sender, EventArgs e)
+        public async Task OnSendClick(object sender, EventArgs e)
         {
             var hasSelector = messageBox.Text.StartsWith("/");
             string selector = hasSelector ? messageBox.Text.Substring(1).SplitOnFirst(" ")[0] : "cmd.chat";
@@ -185,13 +185,13 @@ namespace AndroidXamarinChat
 
             if (selector == "cmd.chat")
             {
-                client.ServiceClient.PostAsync(new PostChatToChannel
+                await client.ServiceClient.PostAsync(new PostChatToChannel
                 {
                     Channel = cmdReceiver.CurrentChannel,
                     From = client.SubscriptionId,
                     Message = message,
                     Selector = selector
-                }).ConfigureAwait(false);
+                });
             }
             else if (selector == "logout")
             {
@@ -199,13 +199,13 @@ namespace AndroidXamarinChat
             }
             else
             {
-                client.ServiceClient.PostAsync(new PostRawToChannel
+                await client.ServiceClient.PostAsync(new PostRawToChannel
                 {
                     Channel = cmdReceiver.CurrentChannel,
                     From = client.SubscriptionId,
                     Message = message,
                     Selector = selector
-                }).ConfigureAwait(false);
+                });
             }
 
             messageBox.Text = "";

@@ -49,8 +49,7 @@ namespace AndroidXamarinChat
             var image = row.FindViewById<ImageView>(Resource.Id.imgUser);
             profileUrl.GetImageBitmap().ContinueWith(bitmap =>
             {
-                Application.SynchronizationContext.Post(_ =>
-                {
+                Application.SynchronizationContext.Post(_ => {
                     image.SetImageBitmap(bitmap.Result);
                 }, null);
             }).ConfigureAwait(false);

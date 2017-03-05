@@ -50,7 +50,7 @@ namespace AndroidXamarinChat
             var btnAnon = FindViewById<ImageButton>(Resource.Id.btnAnon);
             var client = new JsonServiceClient(MainActivity.BaseUrl);
 
-            btnTwitter.Click += (sender, args) =>
+            btnTwitter.Click += async (sender, args) =>
             {
                 StartProgressBar();
                 Account existingAccount;
@@ -60,39 +60,21 @@ namespace AndroidXamarinChat
                     try
                     {
                         client.CookieContainer = existingAccount.Cookies;
-                        var task = client.GetAsync(new GetUserDetails());
-                        task.ConfigureAwait(false);
-                        task.ContinueWith(res =>
-                        {
-                            if (res.Exception != null)
-                            {
-                                // Failed with current cookie 
-                                client.ClearCookies();
-                                PerformServiceStackAuth(client);
-                                StopProgressBar();
-                            }
-                            else
-                            {
-                                StartAuthChatActivity(client, existingAccount);
-                                StopProgressBar();
-                            }
-
-                        });
+                        await client.GetAsync(new GetUserDetails());
+                        StartAuthChatActivity(client, existingAccount);
                     }
                     catch (Exception)
                     {
                         // Failed with current cookie 
                         client.ClearCookies();
-                        StopProgressBar();
                         PerformServiceStackAuth(client);
                     }
                 }
                 else
                 {
-                    StopProgressBar();
                     PerformServiceStackAuth(client);
                 }
-
+                StopProgressBar();
             };
 
             btnAnon.Click += (sender, args) =>
