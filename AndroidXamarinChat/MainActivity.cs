@@ -42,9 +42,9 @@ namespace AndroidXamarinChat
             { "Announce Hello", "/cmd.announce Hello from Xamarin.Android" },
             { "Play YouTube",   "/tv.watch https://youtu.be/u5CVsCnxyXg" },
             { "Background Image", "/css.background-image url(http://bit.ly/2lxT0gh)" },
-            { "Background Top", "/css.background$#top #cccccc" },
-            { "Background", "/css.background #fdffe7" },
-            { "Background Bottom", "/css.background$#bottom #0091ea" },
+            { "Background Top", "/css.background$#top #2c3e50" },
+            { "Background Color", "/css.background #ecf0f1" },
+            { "Background Bottom", "/css.background$#bottom #2c3e50" },
             { "Logout", "/logout" }
         };
 
