@@ -19,50 +19,38 @@ namespace AndroidXamarinChat
 
         public static Task UpdateChatHistory(this ServerEventsClient client, ChatCommandHandler cmdReceiver)
         {
-            return Task.Run(() =>
+            return client.ServiceClient.GetAsync(new GetChatHistory {
+                Channels = client.Channels
+            }).Success(chatHistory => 
             {
-                var chatHistory = client.ServiceClient.Get(new GetChatHistory
-                {
-                    Channels = client.Channels
-                });
                 cmdReceiver.FullHistory = new Dictionary<string, List<ChatMessage>>();
-                try
+                foreach (var channel in client.Channels)
                 {
-                    foreach (var channel in client.Channels)
-                    {
-                        var currentChannel = channel;
-                        cmdReceiver.FullHistory.Add(channel,
-                            chatHistory.Results
-                                .Where(x => x.Channel == currentChannel)
-                                .Select(x => x).ToList());
-                    }
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
+                    var currentChannel = channel;
+                    cmdReceiver.FullHistory.Add(channel,
+                        chatHistory.Results
+                            .Where(x => x.Channel == currentChannel)
+                            .Select(x => x).ToList());
                 }
                 cmdReceiver.SyncAdapter();
             });
         }
 
-        public static void ChangeChannel(this ServerEventsClient client, string channel, ChatCommandHandler cmdReceiver)
+        public static Task ChangeChannel(this ServerEventsClient client, string channel, ChatCommandHandler cmdReceiver)
         {
-            var currentChannels = new List<string>(client.Channels);
-
-            if (cmdReceiver.FullHistory.ContainsKey(channel) && currentChannels.Contains(channel))
+            if (cmdReceiver.FullHistory.ContainsKey(channel) && client.Channels.Contains(channel))
             {
                 cmdReceiver.ChangeChannel(channel);
+                cmdReceiver.SyncAdapter();
+                return Task.CompletedTask;
             }
-            else
-            {
 
-                if (!currentChannels.Contains(channel))
-                    currentChannels.Add(channel);
-
-                client.SubscribeToChannels(currentChannels.ToArray());
-                cmdReceiver.CurrentChannel = channel;
-                client.UpdateChatHistory(cmdReceiver).ConfigureAwait(false);
-            }
+            return client.SubscribeToChannelsAsync(channel)
+                .Then(t =>
+                {
+                    cmdReceiver.CurrentChannel = channel;
+                    return client.UpdateChatHistory(cmdReceiver);
+                });
         }
 
         public static void SendMessage(this ServerEventsClient client, PostRawToChannel request)

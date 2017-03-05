@@ -159,22 +159,15 @@ namespace AndroidXamarinChat
             string itemText = navigationItemSelectedEventArgs.MenuItem.TitleFormatted.ToString();
             if (itemText == UiHelpers.CreateChannelLabel)
             {
-                var result = UiHelpers.ShowChannelDialog(this);
-                result.ContinueWith(ta =>
-                {
-                    try
+                UiHelpers.ShowChannelDialog(this)
+                    .ContinueWith(ta =>
                     {
                         string nChannel = ta.Result;
                         var nChannels = new List<string>(client.Channels) { nChannel };
                         UiHelpers.ResetChannelDrawer(this, navigationView, nChannels.ToArray());
-                        client.ChangeChannel(ta.Result, cmdReceiver);
-                        cmdReceiver.SyncAdapter();
-                    }
-                    catch (Exception ex)
-                    {
-                        errors.Add(ex);
-                    }
-                });
+                        client.ChangeChannel(ta.Result, cmdReceiver)
+                            .Error(ex => errors.Add(ex));
+                    });
             }
             else
             {
