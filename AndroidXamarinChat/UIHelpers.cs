@@ -110,26 +110,20 @@ namespace AndroidXamarinChat
 
         private static readonly ConcurrentDictionary<string, byte[]> BackgroundCache = new ConcurrentDictionary<string, byte[]>();
 
-        public static Task<Bitmap> GetImageBitmap(this string url)
+        public static async Task<Bitmap> GetImageBitmap(this string url)
         {
-            var task = new Task<Bitmap>(() =>
+            byte[] bytes;
+            if (BackgroundCache.ContainsKey(url))
             {
-                byte[] bytes;
-                if (BackgroundCache.ContainsKey(url))
-                {
-                    bytes = BackgroundCache[url];
-                }
-                else
-                {
-                    bytes = url.GetBytesFromUrl();
-                    BackgroundCache.TryAdd(url, bytes);
-                }
-                var bitmap = BitmapFactory.DecodeByteArray(bytes, 0, bytes.Length);
-                return bitmap;
-            });
-            task.ConfigureAwait(false);
-            task.Start();
-            return task;
+                bytes = BackgroundCache[url];
+            }
+            else
+            {
+                bytes = await url.GetBytesFromUrlAsync();
+                BackgroundCache.TryAdd(url, bytes);
+            }
+            var bitmap = BitmapFactory.DecodeByteArray(bytes, 0, bytes.Length);
+            return bitmap;
         }
     }
 
