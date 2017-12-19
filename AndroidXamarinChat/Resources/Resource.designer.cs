@@ -1314,8 +1314,6 @@ namespace AndroidXamarinChat
 			global::com.refractored.Resource.Styleable.ViewStubCompat_android_id = global::AndroidXamarinChat.Resource.Styleable.ViewStubCompat_android_id;
 			global::com.refractored.Resource.Styleable.ViewStubCompat_android_inflatedId = global::AndroidXamarinChat.Resource.Styleable.ViewStubCompat_android_inflatedId;
 			global::com.refractored.Resource.Styleable.ViewStubCompat_android_layout = global::AndroidXamarinChat.Resource.Styleable.ViewStubCompat_android_layout;
-			global::ServiceStack.Pcl.Android.Resource.String.ApplicationName = global::AndroidXamarinChat.Resource.String.ApplicationName;
-			global::ServiceStack.Pcl.Android.Resource.String.Hello = global::AndroidXamarinChat.Resource.String.Hello;
 		}
 		
 		public partial class Animation
@@ -3963,12 +3961,6 @@ namespace AndroidXamarinChat
 		public partial class String
 		{
 			
-			// aapt resource value: 0x7f080018
-			public const int ApplicationName = 2131230744;
-			
-			// aapt resource value: 0x7f080017
-			public const int Hello = 2131230743;
-			
 			// aapt resource value: 0x7f080000
 			public const int abc_action_bar_home_description = 2131230720;
 			
@@ -4026,8 +4018,8 @@ namespace AndroidXamarinChat
 			// aapt resource value: 0x7f080012
 			public const int abc_toolbar_collapse_description = 2131230738;
 			
-			// aapt resource value: 0x7f08001a
-			public const int app_name = 2131230746;
+			// aapt resource value: 0x7f080018
+			public const int app_name = 2131230744;
 			
 			// aapt resource value: 0x7f080014
 			public const int appbar_scrolling_view_behavior = 2131230740;
@@ -4038,14 +4030,14 @@ namespace AndroidXamarinChat
 			// aapt resource value: 0x7f080016
 			public const int character_counter_pattern = 2131230742;
 			
-			// aapt resource value: 0x7f08001c
-			public const int closeDrawer = 2131230748;
+			// aapt resource value: 0x7f08001a
+			public const int closeDrawer = 2131230746;
+			
+			// aapt resource value: 0x7f080017
+			public const int hello = 2131230743;
 			
 			// aapt resource value: 0x7f080019
-			public const int hello = 2131230745;
-			
-			// aapt resource value: 0x7f08001b
-			public const int openDrawer = 2131230747;
+			public const int openDrawer = 2131230745;
 			
 			// aapt resource value: 0x7f080013
 			public const int status_bar_notification_info_overflow = 2131230739;
